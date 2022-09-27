@@ -3,6 +3,12 @@ AutoGradingScript for USC EE-538
 
 **`.github/workflows` should be protected from modified by setting ownership.**
 
+`config.json` should be like:
+
+```json
+{"q_num": [1, 2, 3, 4], "grader_repo": "ee538/Summer22_HW5_CodingGrader"}
+```
+
 `questions.json` should be like:
 
 ```json
@@ -23,6 +29,15 @@ AutoGradingScript for USC EE-538
 }
 ```
 
+To get test count, run:
+
+```bash
+q_nums=(1 2 3 4 5 7 8)
+echo "passed:"
+for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "OK" 2>&1 | sed -n '$='` ","; done
+echo "failed:"
+for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "FAIL" 2>&1 | sed -n '$='` ","; done
+```
 `classroom.yml` should be like:
 
 ```yaml
@@ -132,8 +147,3 @@ jobs:
              git push origin HEAD:main -f
 ```
 
-`config.json` should be like:
-
-```json
-{"q_num": [1, 2, 3, 4], "grader_repo": "ee538/Summer22_HW5_CodingGrader"}
-```
