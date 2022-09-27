@@ -39,6 +39,16 @@ AutoGradingScript for USC EE-538
 To get test count, run:
 
 ```bash
+q_nums=(1 2 3 4 5 7 8)
+echo "passed:"
+for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "OK" 2>&1 | sed -n '$='` ","; done
+echo "failed:"
+for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "FAIL" 2>&1 | sed -n '$='` ","; done
+```
+
+classroom.yml should be like:
+
+```bash
 name: GitHub Classroom Workflow
 
 on: [push, pull_request]
