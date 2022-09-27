@@ -39,7 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2 
       - id: load
-        run: |
+        name: Load data
+	run: |
              data=`cat .github/workflows/config.json`
              echo "::set-output name=matrix::$data"
   testing:
