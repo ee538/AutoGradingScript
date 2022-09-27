@@ -74,7 +74,8 @@ jobs:
       - name: Test Q${{matrix.q_num}}
         if: always()
         run: |
-             cp files/${{matrix.q_num}}/{q.cc} coding_grader/${{matrix.q_num}}/
+	     cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
+             # cp files/${{matrix.q_num}}/{q.h, q.cc} coding_grader/${{matrix.q_num}}/
              echo "--------- student test ---------"
              bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //files/${{matrix.q_num}}:student_test
              if [ $? -ne 0 ] ; then  exit 1; fi
