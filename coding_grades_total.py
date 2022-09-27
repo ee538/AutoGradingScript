@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	full_score = {}
 	test_cases = {}
 
-	with open('questions.json', encoding='utf-8') as q:
+	with open('coding_grader/questions.json', encoding='utf-8') as q:
 	    result = json.load(q)
 	    q_nums = result.get('q_nums')
 	    full_score = result.get('full_score')
