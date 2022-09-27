@@ -6,7 +6,7 @@ AutoGradingScript for USC EE-538
 `config.json` should be like:
 
 ```json
-{"q_num": [1, 2, 3, 4], "grader_repo": "ee538/Summer22_HW5_CodingGrader"}
+{"q_nums": [1, 2, 3, 4], "grader_repo": "ee538/Summer22_HW5_CodingGrader"}
 ```
 
 `questions.json` should be like:
@@ -73,7 +73,7 @@ jobs:
     timeout-minutes: 3
     strategy:
         matrix:
-            q_num: ${{ fromJSON(needs.setup.outputs.matrix).q_num }}
+            q_num: ${{ fromJSON(needs.setup.outputs.matrix).q_nums }}
     steps:
       - uses: actions/checkout@v2 
       - uses: actions/checkout@master
