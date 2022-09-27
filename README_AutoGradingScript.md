@@ -39,15 +39,6 @@ AutoGradingScript for USC EE-538
 To get test count, run:
 
 ```bash
-q_nums=(1 2 3 4 5 7 8)
-echo "passed:"
-for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "OK" 2>&1 | sed -n '$='` ","; done
-echo "failed:"
-for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "FAIL" 2>&1 | sed -n '$='` ","; done
-```
-`classroom.yml` should be like:
-
-```yaml
 name: GitHub Classroom Workflow
 
 on: [push, pull_request]
@@ -123,7 +114,7 @@ jobs:
       - uses: actions/checkout@master
         with:
             repository: 'ee538/AutoGradingScript'
-            path: 'coding_grader'
+            path: 'grading_script'
       - uses: actions/checkout@master
         with:
             repository: ${{ fromJSON(needs.setup.outputs.matrix).grader_repo }}
@@ -138,7 +129,7 @@ jobs:
              mkdir grades
              mv Q*res_.txt grades
              
-             python coding_grader/coding_grades_total.py 2>&1 | tee ScoresCodingTotal.txt
+             python grading_script/coding_grades_total.py 2>&1 | tee ScoresCodingTotal.txt
              # clean temporary files
              rm -rf grades
              rm -rf ST_*
@@ -152,5 +143,6 @@ jobs:
              
              git commit -m "Add autograding results"
              git push origin HEAD:main -f
+
 ```
 
