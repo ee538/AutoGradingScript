@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	full_score = {}
 	test_cases = {}
 
-	with open('../coding_grader/questions.json', encoding='utf-8') as q:
+	with open('coding_grader/questions.json', encoding='utf-8') as q:
 	    result = json.load(q)
 	    q_nums = result.get('q_nums')
 	    full_score = result.get('full_score')
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	score_per_test = { i: (full_score[i] * 2 // test_cases[i]) / 2 for i in q_nums }
 
 	for q_num in q_nums:
-		pass_num = get_ok_num_perq("../Q" + q_num + "res_.txt")
+		pass_num = get_ok_num_perq("grades/Q" + q_num + "res_.txt")
 		if pass_num < test_cases[q_num]:
 			score = pass_num * score_per_test[q_num]
 		else:
