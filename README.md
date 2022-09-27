@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v2 
       - id: load
         name: Load data
-	run: |
+        run: |
              data=`cat .github/workflows/config.json`
              echo "::set-output name=matrix::$data"
   testing:
