@@ -271,8 +271,8 @@ If the student test is failed, then 0 point will be given for that question and 
 
 ```yaml
 - name: Collect result
-uses: actions/download-artifact@v3
-with:
+  uses: actions/download-artifact@v3
+  with:
     name: subscore
 ```
 
