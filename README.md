@@ -81,7 +81,7 @@ where `questions.json` should be like:
 }
 ```
 
-- `q_nums`: Questions needed to be graded by the script.
+- `q_nums`: The number the questions needed to be graded by the script.
 - `test_cases`: The number of the test cases in `grader_test.cc` for each question.
 - `full_score`: Full credits for each question.
 
@@ -174,7 +174,7 @@ where `config.json` should be like:
 }
 ```
 
-- `q_nums`:  Questions needed to be graded by the script.
+- `q_nums`: The number the questions needed to be graded by the script.
 - `grader_repo`: The location of the **Grader Test repo** prepared from the previous step.
 
 Finally, copy [`classroom.yml`](./classroom.yml) from this repo to the student repo.
@@ -200,7 +200,7 @@ with open('coding_grader/questions.json', encoding='utf-8') as q:
 
 First, read question information from `questions.json` create in step [1.2.](#1.2. Grader Test). 
 
-- `q_nums`: Questions needed to be graded by the script.
+- `q_nums`: The number the questions needed to be graded by the script.
 
 - `test_cases`: The number of the test cases in `grader_test.cc` for each question.
 - `full_score`: Full credits for each question.
