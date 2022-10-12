@@ -209,7 +209,7 @@ First, read question information from `questions.json` create in step [1.2.](#1.
 score_per_test = { i: (full_score[i] * 2 // test_cases[i]) / 2 for i in q_nums }
 ```
 
-Then, set the credits of one test case for each question. 0.5 credits is the minimum unit of the credits for one test case.
+Then, set the credits of one test case for each question. 0.5 credits is the minimum scale unit of the credits for one test case.
 
 ```python
 for q_num in q_nums:
@@ -224,7 +224,7 @@ for q_num in q_nums:
 print("Your total score of coding section:", total_coding_score)
 ```
 
-For each question, **calculate the number of the passed test cases** and compare with the number of all test cases. If not all are passed, score of that question will be the number of the passed test cases multiplied by the credits of one test case. If all are passes, then he score will be full.
+For each question, **calculate the number of the passed test cases** and compare with the number of all test cases. If not all are passed, score of that question will be the number of the passed test cases multiplied by the credits for one test case. If all are passed, then the score will be full.
 
 Finally `total_coding_score` is calculated.
 
