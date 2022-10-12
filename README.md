@@ -239,7 +239,7 @@ setup:
     ...
     run: |
     	data=`cat .github/workflows/config.json | tr '\n' ' ' | tr '\r' ' '`
-	    echo "::set-output name=matrix::$data"
+        echo "::set-output name=matrix::$data"
 
     ...
 testing:
@@ -273,7 +273,7 @@ If the student test is failed, then 0 point will be given for that question and 
 - name: Collect result
 uses: actions/download-artifact@v3
 with:
-	name: subscore
+    name: subscore
 ```
 
 Collecting the result of each question.
