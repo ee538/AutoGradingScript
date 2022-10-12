@@ -31,7 +31,7 @@ A **public** grader test repo is needed with the directory like this:
 └── questions.json # other files are all from the professor's workspace except this file
 ```
 
-The workspace directory should be like:
+The professor's workspace directory should be like:
 
 ```shell
 ├── check_all_test.sh # copy this file manually from this repo
