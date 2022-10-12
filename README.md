@@ -1,158 +1,287 @@
 # AutoGradingScript
-AutoGradingScript for USC EE-538
+AutoGradingScript for USC EE-538 version 0.1 on 10/12/2022.
 
-**`.github/workflows` should be protected from modified by setting ownership.**
 
-`config.json` should be like:
 
-```json
-{"q_nums": [1, 2, 3, 4], "grader_repo": "ee538/Summer22_HW5_CodingGrader"}
+### 1. Repos Needed
+
+To use this grading script, 3 repos are needed.
+
+#### 1.1. Grading Script
+
+This repo (AutoGradingScript) is the **public** grading script repo, where [`coding_grades_total.py`](./coding_grades_total.py) is required.
+
+#### 1.2. Grader Test
+
+A **public** grader test repo is needed with the directory like this:
+
+```shell
+@ee538/Fall22_HW3_CodingGrader
+
+.
+├── 2
+│   ├── BUILD
+│   ├── grader_test.cc
+│   └── q.h
+├── 3
+│   ├── BUILD
+...
+│   ├── grader_test.cc
+│   └── q.h
+└── questions.json # other files are all from the professor's workspace except this file
 ```
 
-`questions.json` should be like:
+The workspace directory should be like:
+
+```shell
+├── check_all_test.sh # copy this file manually from this repo
+├── files
+│   ├── 2
+│   │   ├── BUILD
+│   │   ├── q.cc
+│   │   ├── q.h
+│   │   └── student_test.cc
+│   ├── 3
+│   │   ├── BUILD
+│   │   ├── q.cc
+│   │   ├── q.h
+...
+│   │   └── student_test.cc
+└── sol
+    ├── 2
+    │   ├── BUILD
+    │   ├── grader_test.cc
+    │   ├── q.cc
+    │   └── q.h
+    ├── 3
+    │   ├── BUILD
+    │   ├── grader_test.cc
+    │   ├── q.cc
+    ...
+        └── q.h
+```
+
+where `questions.json` should be like:
 
 ```json
 {
-	"q_nums": ["1", "2", "3", "4", "5", "7", "8"],
+	"q_nums": ["2", "3", "4", "5"],
 	"test_cases": {
-		"1": 4 ,
-		"2": 25 ,
-		"3": 1 ,
-		"4": 24 ,
-		"5": 7 ,
-		"7": 4 ,
-		"8": 8 
+		"2": 8,
+		"3": 9,
+		"4": 16,
+		"5": 20
 	},
 	"full_score": {
-		"1": 10,
-		"2": 25,
-		"3": 20,
-		"4": 10,
-		"5": 20,
-		"7": 10,
-		"8": 15
+		"2": 15,
+		"3": 15,
+		"4": 40,
+		"5": 30
 	}
 }
-
 ```
 
-To get test count, run:
+- `q_nums`: Questions needed to be graded by the script.
+- `test_cases`: The number of the test cases in `grader_test.cc` for each question.
+- `full_score`: Full credits for each question.
 
-```bash
-q_nums=(1 2 3 4 5 7 8)
-echo "passed:"
-for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "OK" 2>&1 | sed -n '$='` ","; done
-echo "failed:"
-for q_num in "${q_nums[@]}"; do echo "\"$q_num\":" `bazel test sol/$q_num:grader_test --test_output=all --config=asan 2>&1 | grep "FAIL" 2>&1 | sed -n '$='` ","; done
+
+
+To get the number of test cases for each question and make sure there is no memory misuse or failed test, copy [`check_all_test.sh`](check_all_test.sh) from this repo to the workspace and run the following command in the root folder of the workspace. `2 3 4 5` are the 4 questions under testing.
+
+```shell
+./check_all_test.sh 2 3 4 5
 ```
 
-classroom.yml should be like:
+The outputs may be like: (with errors)
 
-```bash
-name: GitHub Classroom Workflow
+```shell
+passed:
+"2": 8,
+"3": 9,
+"4": 16,
+"5": 20,
+failed:
+"2": ,
+"3": ,
+"4": 4,			# errors
+"5": ,
+memory misuse:
+"2": ,
+"3": ,
+"4": 1,			# errors
+"5": ,
+```
 
-on: [push, pull_request]
-    
-jobs:
-  setup:
-    name: Loading data
-    runs-on: ubuntu-22.04
+After checking and solving all the errors, the outputs should be like this **with no failed or memory misuse cases**:
+
+```shell
+passed:
+"2": 8,
+"3": 9,
+"4": 16,
+"5": 20,
+failed:
+"2": ,
+"3": ,
+"4": ,
+"5": ,
+memory misuse:
+"2": ,
+"3": ,
+"4": ,
+"5": ,
+```
+
+After creating the `questions.json` and solving the errors in the grader_test.cc, the preparation for this repo is done.
+
+#### 1.3. Student Repository
+
+```shell
+.
+├── .bazelrc
+├── .github
+│   └── workflows
+│       ├── classroom.yml	# copy this file manually from this repo
+│       └── config.json		# add this file manually
+├── .gitignore
+├── .vscode
+│   ├── launch.json
+│   ├── settings.json
+│   └── tasks.json
+├── README.md
+├── WORKSPACE
+└── files
+    ├── 1
+    │   ├── BUILD
+    │   ├── README.md
+    │   ├── q.cc
+    │   └── q.h
+    ├── 2
+    │   ├── BUILD
+    │   ├── q.cc
+    │   ├── q.h
+    ...
+        └── student_test.cc
+```
+
+where `config.json` should be like:
+
+```json
+{
+  "q_nums": ["2", "3", "4", "5"], 
+  "grader_repo": "ee538/Fall22_HW3_CodingGrader"
+}
+```
+
+- `q_nums`:  Questions needed to be graded by the script.
+- `grader_repo`: The location of the **Grader Test repo** prepared from the previous step.
+
+Finally, copy [`classroom.yml`](./classroom.yml) from this repo to the student repo.
+
+
+
+### 2. `coding_grades_total.py`
+
+The script should be similar to this:
+
+```python
+total_coding_score = 0.0;
+q_nums = []
+full_score = {}
+test_cases = {}
+
+with open('coding_grader/questions.json', encoding='utf-8') as q:
+    result = json.load(q)
+    q_nums = result.get('q_nums')
+    full_score = result.get('full_score')
+    test_cases = result.get('test_cases')
+```
+
+First, read question information from `questions.json` create in step [1.2.](#1.2. Grader Test). 
+
+- `q_nums`: Questions needed to be graded by the script.
+
+- `test_cases`: The number of the test cases in `grader_test.cc` for each question.
+- `full_score`: Full credits for each question.
+
+```python
+score_per_test = { i: (full_score[i] * 2 // test_cases[i]) / 2 for i in q_nums }
+```
+
+Then, set the credits of one test case for each question. 0.5 credits is the minimum unit of the credits for one test case.
+
+```python
+for q_num in q_nums:
+	pass_num = get_ok_num_perq("grades/Q" + q_num + "res_.txt")
+	if pass_num < test_cases[q_num]:
+		score = pass_num * score_per_test[q_num]
+	else:
+		score = full_score[q_num]
+	print("Q",q_num,": ", pass_num, "/", test_cases[q_num], "passed | score:", score)
+	total_coding_score += score
+
+print("Your total score of coding section:", total_coding_score)
+```
+
+For each question, **calculate the number of the passed test cases** and compare with the number of all test cases. If not all are passed, score of that question will be the number of the passed test cases multiplied by the credits of one test case. If all are passes, then he score will be full.
+
+Finally `total_coding_score` is calculated.
+
+### 3. `classroom.yml`
+
+The `classroom.yml` file should be similar to this:
+
+```yaml
+setup:
     outputs:
-      matrix: ${{ steps.load.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v2 
-      - id: load
-        name: Load data
-        run: |
-             data=`cat .github/workflows/config.json`
-             echo "::set-output name=matrix::$data"
-  testing:
+      	matrix: ${{ steps.load.outputs.matrix }}
+    ...
+    run: |
+    	data=`cat .github/workflows/config.json | tr '\n' ' ' | tr '\r' ' '`
+	    echo "::set-output name=matrix::$data"
+
+    ...
+testing:
     name: Grading Q${{matrix.q_num}}
     needs: setup
     continue-on-error: true
-    runs-on: ubuntu-22.04
     timeout-minutes: 3
     strategy:
-        matrix:
-            q_num: ${{ fromJSON(needs.setup.outputs.matrix).q_nums }}
+    	matrix:
+    		q_num: ${{ fromJSON(needs.setup.outputs.matrix).q_nums }}
     steps:
-      - uses: actions/checkout@v2 
-      - uses: actions/checkout@master
-        with:
-            repository: ${{ fromJSON(needs.setup.outputs.matrix).grader_repo }}
-            path: 'coding_grader'
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/bazel
-          key: bazel-Q${{matrix.q_num}}
-      - name: Clear previous test result
-        if: always()
-        run: |
-            echo "" > Q${{matrix.q_num}}res_.txt
-      - name: Prepare for the test result
-        uses: actions/upload-artifact@v3
-        with:
-          name: subscore
-          path: Q${{matrix.q_num}}res_.txt
-          retention-days: 1
-      - name: Test Q${{matrix.q_num}}
-        if: always()
-        run: |
-             cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
-             # cp files/${{matrix.q_num}}/{q.cc,q.h} coding_grader/${{matrix.q_num}}/
-             echo "--------- student test ---------"
-             bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //files/${{matrix.q_num}}:student_test
-             if [ $? -ne 0 ] ; then  exit 1; fi
-             echo "--------- grader test ---------"
-             bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //coding_grader/${{matrix.q_num}}:grader_test 2>&1 | tee Q${{matrix.q_num}}res.txt
-             grep "OK" Q${{matrix.q_num}}res.txt > Q${{matrix.q_num}}res_.txt
-             chmod 777 ~/.cache/* -R 
-      - name: Upload result for Q${{matrix.q_num}}
-        uses: actions/upload-artifact@v3
-        with:
-          name: subscore
-          path: Q${{matrix.q_num}}res_.txt
-          retention-days: 1
-
-  collecting-result:
-    name: Collecting result
-    needs: [testing, setup]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 3
-    steps:
-      - uses: actions/checkout@v2  
-      - uses: actions/checkout@master
-        with:
-            repository: 'ee538/AutoGradingScript'
-            path: 'grading_script'
-      - uses: actions/checkout@master
-        with:
-            repository: ${{ fromJSON(needs.setup.outputs.matrix).grader_repo }}
-            path: 'coding_grader'
-      - name: Collect result
-        uses: actions/download-artifact@v3
-        with:
-          name: subscore
-      - name: Organize the total score (coding questions)
-        if: always()
-        run: |
-             mkdir grades
-             mv Q*res_.txt grades
-             
-             python grading_script/coding_grades_total.py 2>&1 | tee ScoresCodingTotal.txt
-             # clean temporary files
-             rm -rf grades
-             rm -rf ST_*
-             rm -rf coding_grader
-             
-             TZ='America/Los_Angeles' date >> ScoresCodingTotal.txt
-             
-             git config --global user.email "ee538.autograder@gmail.com"
-             git config --global user.name "AutograderEE538"
-             git add ScoresCodingTotal.txt
-             
-             git commit -m "Add autograding results"
-             git push origin HEAD:main -f
-	     
+    ...
 ```
 
+First, read question information from `config.json` create in step [1.3.](#1.3. Student Repository) and generate parallel jobs to test each question. Set timeout for each question as 3 minutes and continue on error flag.
+
+```shell
+cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
+echo "--------- student test ---------"
+bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //files/${{matrix.q_num}}:student_test
+if [ $? -ne 0 ] ; then  exit 1; fi
+echo "--------- grader test ---------"
+bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //coding_grader/${{matrix.q_num}}:grader_test 2>&1 | tee Q${{matrix.q_num}}res.txt
+grep "OK" Q${{matrix.q_num}}res.txt > Q${{matrix.q_num}}res_.txt
+chmod 777 ~/.cache/* -R 
+```
+
+If the student test is failed, then 0 point will be given for that question and stop running the following tests. Else run the grader test and count the number of passed test cases.
+
+```yaml
+- name: Collect result
+uses: actions/download-artifact@v3
+with:
+	name: subscore
+```
+
+Collecting the result of each question.
+
+```shell
+git add ScoresCodingTotal.txt
+git commit -m "Add autograding results"
+git push origin HEAD:main -f
+```
+
+Update `ScoresCodingTotal`.
