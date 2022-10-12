@@ -3,19 +3,11 @@ import json
 
 
 def get_ok_num_perq(tresfile):
-    file = open(tresfile,"r")
-    cnt = 0
+    file = open(tresfile, "r")
     f = file.read()
     lists = f.split("\n")
-    
-    for i in lists:
-        if i:
-            cnt += 1
-    
-    return cnt
-
-
-
+    file.close()
+    return sum(x != '' for x in lists)
 
 if __name__ == '__main__':
 	
