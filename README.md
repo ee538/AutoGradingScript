@@ -87,7 +87,7 @@ where `questions.json` should be like:
 
 
 
-To get the number of test cases for each question and make sure there is no memory misuse or failed test, copy [`check_all_test.sh`](check_all_test.sh) from this repo to the workspace and run the following command in the root folder of the workspace. `2 3 4 5` are the 4 questions under testing.
+To get the number of the test cases for each question and make sure there is no memory misuse or failed test, copy [`check_all_test.sh`](check_all_test.sh) from this repo to the workspace and run the following command in the root folder of the workspace. `2 3 4 5` are the 4 questions under testing.
 
 ```shell
 ./check_all_test.sh 2 3 4 5
