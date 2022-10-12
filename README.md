@@ -175,7 +175,7 @@ where `config.json` should be like:
 ```
 
 - `q_nums`: The number the questions needed to be graded by the script.
-- `grader_repo`: The location of the **Grader Test repo** prepared from the previous step.
+- `grader_repo`: The location of the **Grader Test repo** prepared from the [previous step](#12-grader-test).
 
 Finally, copy [`classroom.yml`](./classroom.yml) from this repo to the student repo.
 
@@ -198,7 +198,7 @@ with open('coding_grader/questions.json', encoding='utf-8') as q:
     test_cases = result.get('test_cases')
 ```
 
-First, read question information from `questions.json` create in step [1.2.](#1.2. Grader Test). 
+First, read question information from `questions.json` create in step [1.2.](#12-grader-test). 
 
 - `q_nums`: The number the questions needed to be graded by the script.
 
@@ -254,7 +254,7 @@ testing:
     ...
 ```
 
-First, read question information from `config.json` created in step [1.3.](#1.3. Student Repository) and generate parallel jobs to test each question. Set timeout for each question as 3 minutes and continue on error flag.
+First, read question information from `config.json` created in step [1.3.](#13-student-repository) and generate parallel jobs to test each question. Set timeout for each question as 3 minutes and continue on error flag.
 
 ```shell
 cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
