@@ -254,7 +254,7 @@ testing:
     ...
 ```
 
-First, read question information from `config.json` create in step [1.3.](#1.3. Student Repository) and generate parallel jobs to test each question. Set timeout for each question as 3 minutes and continue on error flag.
+First, read question information from `config.json` created in step [1.3.](#1.3. Student Repository) and generate parallel jobs to test each question. Set timeout for each question as 3 minutes and continue on error flag.
 
 ```shell
 cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
