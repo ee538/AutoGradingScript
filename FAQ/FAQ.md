@@ -76,4 +76,4 @@
 
 ### A5
 
-- Not sure. But I should say there may more than one assertion in one test case and there may be some other operations between the two assertion statements, so the expected result of the second assertion may not be the one we use for the first assertion. So feel free to post your questions on Piazza after you pass some tests locally.
+- Not sure. But I should say there may be more than one assertion in one test case and there may be some other operations between the two assertion statements, so the expected result of the second assertion may not be the one we use for the first assertion. So feel free to post your questions on Piazza after you pass some tests locally.
