@@ -2,7 +2,7 @@
 
 ### Q1
 
-- My grading workflow **was running for rather long time** on a certain question and I finally only got some message like: **`Error:`** `The log was not found. It may have been deleted based on retention settings. ` without anything else. You please don't care whether my code passes the tests locally, but the grading script doesn't work anyway! 
+- My grading workflow **was running for rather long time** on a certain question and I finally only got some message like: **`Error:`** `The log was not found. It may have been deleted based on retention settings.`  without anything else. You please don't care whether my code passes the tests locally, but the grading script doesn't work anyway! 
 
   
 
