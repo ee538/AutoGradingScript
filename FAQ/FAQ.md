@@ -33,7 +33,7 @@
   | ------------------------------------- | ------------------------------------------------------------ |
   | ` stack-buffer-overflow `             | You might access a position outside of an array (or vector, etc.), which may probably happen in your **loop block**. You may check the boundary conditions of related loop statement. |
   | `SEGV on unknown address xxx`         | - If the `xxx` is `0x00`, it is likely that you were **dereferencing a `nullptr`**. You should **check the corner cases** in you code in that case.  <br />- If the `xxx` is something other than `0x00`, you might assign a non-accessible address to a pointer before you accessed the value of that pointer. |
-  | `memory leak`                         | - That means you **didn't delete** a memory after using `new`. The destructor of a class will not be called automatically if you store the object in heap memory with `new` operator. You should always remember to delete all of the new'ed memory.<br />- If you think that you have already deleted the memory, you may check if you have mixed `delete` and `delete []`. |
+  | `memory leak` or `allocate-deallocate-mismatch` | - That means you **didn't delete** a memory after using `new`. The destructor of a class will not be called automatically if you store the object in heap memory with `new` operator. You should always remember to delete all of the new'ed memory.<br />- If you think that you have already deleted the memory, you may check if you have mixed `delete` and `delete []`. |
 
 
 
