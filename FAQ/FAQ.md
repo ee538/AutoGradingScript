@@ -15,7 +15,7 @@
 
 ### Q2
 
-- I have passed all my test cases locally but I got **memory misuse errors** as follow when running the grading script. I don't understand what those errors mean given by the grading script.
+- I have passed all my test cases locally but I got **memory misuse errors** as follow when running the grading script. I don't understand what those errors mean given by the grading script. Should I just ignore them?
 
   
 
@@ -27,7 +27,7 @@
 
 - We use `--config=asan` flag to detect memory misuse in your code. You may think of which part in your code may cause the memory misuse from the specific hints (like ` stack-buffer-overflow `, `SEGV on unknown address xxx`, `memory leak` etc.) given by the address sanitizer.
 
-- You should write some tests trying to cover multiple cases and pass them locally first before you push your code to GitHub. You may **step through** your code to the crash position and go to the **call stack** where you should pay attention to **the part that is in our code** to find the bug.
+- You should write some tests trying to cover multiple cases and pass them locally first before you push your code to GitHub. You may **step through** your code to the crash position and go to the **call stack** where you should pay attention to **the part that is in our code** to find the bug. If you think you have done so, you may actually not cover enough cases in your tests, so you should not ignore the errors.
 
   | Error Message from the Grading Script | Possible Reason and Solution                                 |
   | ------------------------------------- | ------------------------------------------------------------ |
