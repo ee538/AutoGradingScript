@@ -30,10 +30,10 @@ jobs:
         with:
             repository: ${{ fromJSON(needs.setup.outputs.matrix).grader_repo }}
             path: 'coding_grader'
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/bazel
-          key: bazel-Q${{matrix.q_num}}
+#       - uses: actions/cache@v3
+#         with:
+#           path: ~/.cache/bazel
+#           key: bazel-Q${{matrix.q_num}}
       - name: Clear previous test result
         if: always()
         run: |
@@ -55,7 +55,7 @@ jobs:
              echo "--------- grader test ---------"
              bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //coding_grader/${{matrix.q_num}}:grader_test 2>&1 | tee Q${{matrix.q_num}}res.txt
              grep "OK" Q${{matrix.q_num}}res.txt > Q${{matrix.q_num}}res_.txt
-             chmod 777 ~/.cache/* -R 
+             # chmod 777 ~/.cache/* -R 
       - name: Upload result for Q${{matrix.q_num}}
         uses: actions/upload-artifact@v3
         with:
