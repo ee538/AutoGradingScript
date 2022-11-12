@@ -101,4 +101,4 @@ jobs:
              git add ScoresCodingTotal.txt
              
              git commit -m "Add autograding results"
-             git push origin HEAD:main -f
+             git push origin HEAD:master -f
