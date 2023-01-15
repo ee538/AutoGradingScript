@@ -206,6 +206,7 @@ First, read question information from `questions.json` create in step [1.2.](#12
 - `full_score`: Full credits for each question.
 
 ```python
+# this line is changed already, this is just a sample
 score_per_test = { i: (full_score[i] * 2 // test_cases[i]) / 2 for i in q_nums }
 ```
 
