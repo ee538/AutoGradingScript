@@ -25,10 +25,13 @@ if __name__ == '__main__':
 
     for q_num in q_nums:
         pass_num = get_ok_num_perq("grades/Q" + q_num + "res_.txt")
+        
         if pass_num < test_cases[q_num]:
             score = pass_num * score_per_test[q_num]
         else:
             score = full_score[q_num]
+        
+        score = int(score)
         print("Q",q_num,": ", pass_num, "/", test_cases[q_num], "passed | score:", score)
         total_coding_score += score
 
