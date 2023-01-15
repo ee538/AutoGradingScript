@@ -13,8 +13,13 @@ jobs:
       - id: load
         name: Load data
         run: |
+
+             # read 'config.json' file to 'data' variable
              data=`cat .github/workflows/config.json | tr '\n' ' ' | tr '\r' ' '`
+
+             # pass 'data' variable to the next job, see github workflow api
              echo "::set-output name=matrix::$data"
+
   testing:
     name: Grading Q${{matrix.q_num}}
     needs: setup
@@ -23,11 +28,13 @@ jobs:
     timeout-minutes: 3
     strategy:
         matrix:
+            # this job will be generated dynamically depending on the 'q_nums' read from json
             q_num: ${{ fromJSON(needs.setup.outputs.matrix).q_nums }}
     steps:
       - uses: actions/checkout@v3 
       - uses: actions/checkout@master
         with:
+            # this repository is the one that contains 'grader tests'
             repository: ${{ fromJSON(needs.setup.outputs.matrix).grader_repo }}
             path: 'coding_grader'
       - name: Clear previous test result
@@ -35,6 +42,9 @@ jobs:
         run: |
             echo "" > Q${{matrix.q_num}}res_.txt
       - name: Prepare for the test result
+        # this part was initially written to use an empty file to replace the previous grading result
+        # it maybe can be removed, but needs further testing
+        # please contact yudewei@usc.edu
         uses: actions/upload-artifact@v3
         with:
           name: subscore
@@ -43,18 +53,26 @@ jobs:
       - name: Test Q${{matrix.q_num}}
         if: always()
         run: |
+             # this line is used when the header file should not be allowed to change
              # cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
+
+             # this line is used when the header file should be allowed to change
              cp files/${{matrix.q_num}}/{q.cc,q.h} coding_grader/${{matrix.q_num}}/
+
              echo "--------- student test ---------"
              bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //files/${{matrix.q_num}}:student_test
+             # if the 'student tests' doesn't pass, the script will skip this question and give 0 point
              if [ $? -ne 0 ] ; then  exit 1; fi
+
              echo "--------- grader test ---------"
              bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //coding_grader/${{matrix.q_num}}:grader_test 2>&1 | tee Q${{matrix.q_num}}res.txt
+             # output the testing result to Q1res.txt, Q2res.txt...
+             # copy the lines with 'OK' in Q1res_.txt, Q2res_.txt...
              grep "OK" Q${{matrix.q_num}}res.txt > Q${{matrix.q_num}}res_.txt
-             # chmod 777 ~/.cache/* -R 
       - name: Upload result for Q${{matrix.q_num}}
         uses: actions/upload-artifact@v3
         with:
+          # upload the subscore files
           name: subscore
           path: Q${{matrix.q_num}}res_.txt
           retention-days: 1
@@ -77,24 +95,30 @@ jobs:
       - name: Collect result
         uses: actions/download-artifact@v3
         with:
+          # retrieve the subscore files
           name: subscore
       - name: Organize the total score (coding questions)
         if: always()
         run: |
+
              mkdir grades
              mv Q*res_.txt grades
-             
+
+             # everything can be actually written in Python, and please do that 
+             # calculate the score for each question and output to 'ScoresCodingTotal.txt'
              python grading_script/coding_grades_total.py 2>&1 | tee ScoresCodingTotal.txt
+             
+             # add timestamp to ScoresCodingTotal.txt
+             TZ='America/Los_Angeles' date >> ScoresCodingTotal.txt
+
              # clean temporary files
              rm -rf grades
              rm -rf ST_*
              rm -rf coding_grader
              
-             TZ='America/Los_Angeles' date >> ScoresCodingTotal.txt
-             
+             # update repository
              git config --global user.email "ee538.autograder@gmail.com"
              git config --global user.name "AutograderEE538"
              git add ScoresCodingTotal.txt
-             
              git commit -m "Add autograding results"
              git push origin HEAD:main -f
