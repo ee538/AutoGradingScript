@@ -21,7 +21,7 @@ if __name__ == '__main__':
         full_score = result.get('full_score')
         test_cases = result.get('test_cases')
 
-    score_per_test = { i: (full_score[i] * 2 // test_cases[i]) / 2 for i in q_nums }
+    score_per_test = { q_num: (full_score[q_num] / test_cases[q_num]) for q_num in q_nums }
 
     for q_num in q_nums:
         pass_num = get_ok_num_perq("grades/Q" + q_num + "res_.txt")
