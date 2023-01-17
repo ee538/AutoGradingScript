@@ -18,7 +18,8 @@ jobs:
              data=`cat .github/workflows/config.json | tr '\n' ' ' | tr '\r' ' '`
 
              # pass 'data' variable to the next job, see github workflow api
-             echo "::set-output name=matrix::$data"
+             # echo "::set-output name=matrix::$data"
+             echo "matrix=$data"  >> $GITHUB_OUTPUT
 
   testing:
     name: Grading Q${{matrix.q_num}}
