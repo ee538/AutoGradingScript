@@ -114,6 +114,8 @@ Take **Fall22_HW5** as the example:
 
 - 1.10. Type yes to clean temporary files. Finally remove the `AutoGradingScipt` folder from the repo.
 
+- 1.11. Manually set the Assignment repo as a template and deploy the GitHub classroom. Post it on Piazza. 
+
 ### 2. Repos Needed
 
 To use this grading script, 3 repos are needed.
