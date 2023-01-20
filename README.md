@@ -1,17 +1,128 @@
 # AutoGradingScript
 AutoGradingScript for USC EE-538 version 0.1 on 10/12/2022.
 
+### 1. How to Use
+Take **Fall22_HW5** as the example:
 
+- 1.1. Start Ubuntu system and go to workspace.
 
-### 1. Repos Needed
+   ```bash
+   cd ws
+   ```
+
+- 1.2. Clone the assignment repo given from the professor.
+
+   The professor gave us `https://github.com/ourarash/EE538_Fall22_HW5`.
+
+   ```bash
+   git clone https://github.com/ourarash/EE538_Fall22_HW5.git
+   cd EE538_Fall22_HW5
+   ```
+
+- 1.3. **The first step is always check the ambiguity and the error manually in the code or instructions. Correct them and then proceed** 
+
+- 1.4. Inside the repo folder, we need to make sure there is no error and **all the tests can pass with the solution provided** through a script.
+
+   Download the script:
+
+   ```bash
+   https://github.com/ee538/AutoGradingScript.git
+   ```
+
+   Run the script:
+
+   ```bash
+   python3 AutoGradingScript/grading_utils.py
+   ```
+
+- 1.5. Type the name `Fall22_HW5` for this assignment or type nothing if the default one is correct. Then press the enter key.
+
+- 1.6. The script will run all of the grader tests for several minutes. Please be patient and wait. If you finally see summary like this:
+
+   ```json
+   {
+       "1": {
+           "passed": 2,
+           "failed": 0,
+           "error": ""
+       },
+       "2": {
+           "passed": 7,
+           "failed": 0,
+           "error": ""
+       },
+       "3": {
+           "passed": 17,
+           "failed": 0,
+           "error": ""
+       }
+   }
+   ================================================================================
+   All tests are valid!
+   ```
+
+   This means all the grader tests have passed with the solution provided.
+
+- 1.7. Assign some score for each question. You will see a summary like this:
+
+   ```json
+   Please enter the full score for each question:
+   Q1 (2 test cases): 20
+   Q2 (7 test cases): 45
+   Q3 (17 test cases): 45
+   ================================================================================
+   Fall22_HW5_CodingGrader/questions.json
+   {
+       "q_nums": [
+           "1",
+           "2",
+           "3"
+       ],
+       "test_cases": {
+           "1": 2,
+           "2": 7,
+           "3": 17
+       },
+       "full_score": {
+           "1": 20,
+           "2": 45,
+           "3": 45
+       }
+   }
+   ================================================================================
+   Fall22_HW5/.github/workflows/config.json
+   {
+       "q_nums": [
+           "1",
+           "2",
+           "3"
+       ],
+       "grader_repo": "ee538/Fall22_HW5_CodingGrader"
+   }
+   ================================================================================
+   ```
+
+- 1.8. If we don't want to grade some of the questions with the grading script, please remove them now in the two JSON files. 
+
+   `Fall22_HW5_CodingGrader/questions.json` 
+
+   `Fall22_HW5/.github/workflows/config.json`
+
+- 1.9. Upload the Assignment repo and the Grader repo by typing **yes** if needed.
+
+   Paste the GitHub token to get authentication. Press enter and go the GitHub to check if the two repos have been deployed properly.
+
+- 1.10. Type yes to clean temporary files. Finally remove the `AutoGradingScipt` folder from the repo.
+
+### 2. Repos Needed
 
 To use this grading script, 3 repos are needed.
 
-#### 1.1. Grading Script
+#### 2.1. Grading Script
 
 This repo (AutoGradingScript) is the **public** grading script repo, where [`coding_grades_total.py`](./coding_grades_total.py) is required.
 
-#### 1.2. Grader Test
+#### 2.2. Grader Test
 
 A **public** grader test repo is needed with the directory like this:
 
@@ -135,7 +246,7 @@ memory misuse:
 
 After creating the `questions.json` and solving the errors in the grader_test.cc, the preparation for this repo is done.
 
-#### 1.3. Student Repository
+#### 2.3. Student Repository
 
 ```shell
 .
@@ -181,7 +292,7 @@ Finally, copy [`classroom.yml`](./classroom.yml) from this repo to the student r
 
 
 
-### 2. `coding_grades_total.py`
+### 3. `coding_grades_total.py`
 
 The script should be similar to this:
 
@@ -229,7 +340,7 @@ For each question, **calculate the number of the passed test cases** and compare
 
 Finally `total_coding_score` is calculated.
 
-### 3. `classroom.yml`
+### 4. `classroom.yml`
 
 The `classroom.yml` file should be similar to this:
 
