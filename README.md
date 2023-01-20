@@ -1,5 +1,5 @@
 # AutoGradingScript
-AutoGradingScript for USC EE-538 version 0.1 on 10/12/2022.
+AutoGradingScript for USC EE-538 version 0.2 on 1/19/2023.
 
 ### 1. How to Use
 Take **Fall22_HW5** as the example:
