@@ -19,7 +19,7 @@ Take **Fall22_HW5** as the example:
    cd EE538_Fall22_HW5
    ```
 
-- 1.3. **The first step is always check the ambiguity and the error manually in the code or instructions. Correct them and then proceed** 
+- 1.3. **The first step is always checking the ambiguity and the error manually in the code or instructions. Correct them and then proceed** 
 
 - 1.4. Inside the repo folder, we need to make sure there is no error and **all the tests can pass with the solution provided** through a script.
 
@@ -37,7 +37,7 @@ Take **Fall22_HW5** as the example:
 
 - 1.5. Type the name `Fall22_HW5` for this assignment or type nothing if the default one is correct. Then press the enter key.
 
-- 1.6. The script will run all of the grader tests for several minutes. Please be patient and wait. If you finally see summary like this:
+- 1.6. The script will run all of the grader tests for several minutes. Please be patient and wait. If you finally see a summary like this:
 
    ```json
    {
