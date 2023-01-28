@@ -2,7 +2,7 @@
 
 Over the past assignments, a lot of similar questions on the auto grading script have been asked frequently. Based on those questions, I wrote a FAQ list to help you find the errors and the solution more quickly so that you will not post duplicated questions again and again and we can offer help on Piazza efficaciously. 
 
-**Again, as mentioned, you should try to step through your code first if your code is not running the way as expected.** If you don't know how to do that, please recap the content covered in [Discussion Session 3](https://usc.zoom.us/rec/play/X61pMXvfmU6g5n5sUgE2u88mRI6BNzQy1V1EEWJlrEugTcXKtbFb3c9QjvSSeDDdyEDr0nPia983rSNs.87NK07bntiEp0-mc?continueMode=true).
+**Again, as mentioned, you should try to step through your code first instead of posting a question on Piazza right away if your code is not running the way as expected.** If you don't know how to do that, please recap the content covered in [Discussion Session 3](https://usc.zoom.us/rec/play/X61pMXvfmU6g5n5sUgE2u88mRI6BNzQy1V1EEWJlrEugTcXKtbFb3c9QjvSSeDDdyEDr0nPia983rSNs.87NK07bntiEp0-mc?continueMode=true). After doing that, if you still have any question, please feel free to post them and make them clear.
 
 ### Q1
 
