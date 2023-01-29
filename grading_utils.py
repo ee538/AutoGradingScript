@@ -98,7 +98,8 @@ def output_json(dict_obj: dict, file_path: str, disp: bool=False) -> None:
 
 def generate_coding_grader(coding_grader_name):
     all_files = os.listdir('sol')
-    q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
+    ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
+    q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
     
     # execute all the grader tests for all the questions and get the testing results
     test_results = { q_num: run_test('sol/' + q_num) for q_num in q_nums }
@@ -114,7 +115,7 @@ def generate_coding_grader(coding_grader_name):
     # copy the 'sol' folder as coding_grader_name, remove the solutions
     exec_cmd('rm -rf ' + coding_grader_name)
     exec_cmd('cp -r sol ' + coding_grader_name)
-    exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.h -o -name q.cc -o -name student_test.cc`')
+    exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name *.csh`')
     
     # count the number of test cases for each question using the number of passed tests
     test_cases = { q_num: test_results[q_num]['passed'] for q_num in q_nums }
@@ -139,7 +140,9 @@ def generate_coding_grader(coding_grader_name):
 def generate_assignment(hw_name):
     coding_grader_name = hw_name + '_CodingGrader'
     
-    q_nums = os.listdir('files')
+    all_files = os.listdir('files')
+    ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
+    q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
         
     file_list = [
         '.vscode',
