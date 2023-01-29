@@ -1,4 +1,4 @@
-[V 0.1](https://viterbi-web.usc.edu/~yudewei/main/sources/gradingscript/) on 10/18/2022
+[V 0.2](https://viterbi-web.usc.edu/~yudewei/main/sources/gradingscript/) on 01/18/2023
 
 Over the past assignments, a lot of similar questions on the auto grading script have been asked frequently. Based on those questions, I wrote a FAQ list to help you find the errors and the solution more quickly so that you will not post duplicated questions again and again and we can offer help on Piazza efficaciously. 
 

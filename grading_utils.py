@@ -97,7 +97,8 @@ def output_json(dict_obj: dict, file_path: str, disp: bool=False) -> None:
         print(file_path + '\n' + json_str)
 
 def generate_coding_grader(coding_grader_name):
-    q_nums = os.listdir('sol')
+    all_files = os.listdir('sol')
+    q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
     
     # execute all the grader tests for all the questions and get the testing results
     test_results = { q_num: run_test('sol/' + q_num) for q_num in q_nums }
@@ -154,7 +155,7 @@ def generate_assignment(hw_name):
     exec_cmd('mkdir -p ' + hw_name + '/.github/workflows')
     for file in file_list:
         exec_cmd('cp -r ' + file + ' ' + hw_name)
-    exec_cmd('cp template/classroom.yml ' + hw_name + '/.github/workflows/')
+    exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
         
     output_json({
         'q_nums': q_nums,
