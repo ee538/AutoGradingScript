@@ -66,7 +66,7 @@ Over the past assignments, a lot of similar questions on the auto grading script
 
 ### A4
 
-- You should first **make sure you have implemented all the required functions declared in the header files properly**. If you think you did, you may **check whether you have modified the header file unintentionally**, since the grading script will always use its header files (not yours) that are the ones distributed originally to grade your code. You may also check **whether you should call a function directly or need to have an object to call its method** and **whether you should add scope resolution operators to your definition of the functions**.
+- You should first **make sure you have implemented all the required functions declared in the header files properly**. If you think you did, you may **check whether you have modified the header file unintentionally**~~, since the grading script will always use its header files (not yours) that are the ones distributed originally to grade your code~~. You may also check **whether you should call a function directly or need to have an object to call its method** and **whether you should add scope resolution operators to your definition of the functions**.
 
 ### Q5
 
