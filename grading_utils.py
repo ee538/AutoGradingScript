@@ -114,7 +114,8 @@ def generate_coding_grader(coding_grader_name):
         
     # copy the 'sol' folder as coding_grader_name, remove the solutions
     exec_cmd('rm -rf ' + coding_grader_name)
-    exec_cmd('cp -r sol ' + coding_grader_name)
+    exec_cmd('mkdir ' + coding_grader_name)
+    [exec_cmd('cp -r sol/' + str(q_num) + " " + coding_grader_name + "/" + str(q_num)) for q_num in q_nums]
     exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name *.csh`')
     
     # count the number of test cases for each question using the number of passed tests
