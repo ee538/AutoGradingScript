@@ -31,7 +31,13 @@ with open(csv_path, newline='') as csv_input, open(csv_path + '_out.csv', 'w') a
         date_time = datetime.datetime.strptime(content.split('\n')[-2], format)
         
         subscores = subscore_re.findall(content)
-        totalscore = totalscore_re.findall(content)[0]
+        totalscore_match = totalscore_re.findall(content)
+        if len(totalscore_match) == 0 or len(subscores) == 0:
+        	print("error in processing " + row['github_username'])
+        	print(content)
+        	print('-------- please check it manually --------')
+        	continue
+        totalscore = totalscore_match[0]
         calculated_total = sum([float(subscore[-1]) for subscore in subscores])
         submission_date = str(date_time.date())
         submission_time = str(date_time.time())

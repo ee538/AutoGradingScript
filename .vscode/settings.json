@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "new": "cpp",
+        "*.tcc": "cpp",
+        "string": "cpp",
+        "iostream": "cpp",
+        "stdio.h": "c",
+        "string.h": "c"
+    }
+}
