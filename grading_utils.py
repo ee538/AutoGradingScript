@@ -97,7 +97,7 @@ def output_json(dict_obj: dict, file_path: str, disp: bool=False) -> None:
         print(file_path + '\n' + json_str)
 
 def generate_coding_grader(coding_grader_name):
-    all_files = os.listdir('sol')
+    all_files = sorted(os.listdir('sol'))
     ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
     q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
     
@@ -140,8 +140,7 @@ def generate_coding_grader(coding_grader_name):
     
 def generate_assignment(hw_name):
     coding_grader_name = hw_name + '_CodingGrader'
-    
-    all_files = os.listdir('files')
+    all_files = sorted(os.listdir('files'))
     ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
     q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
         
