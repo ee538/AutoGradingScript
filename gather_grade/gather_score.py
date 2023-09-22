@@ -71,6 +71,7 @@ if not csv_classroom_path in all_files:
             
             writer.writerow(row)
             
+input('Press enter to proceed.')
 
 with open(csv_blackboard_path, newline='', encoding='utf-8-sig') as csv_blackboard, \
     open(csv_classroom_path, newline='') as csv_classroom, \
@@ -113,3 +114,4 @@ with open(csv_blackboard_path, newline='', encoding='utf-8-sig') as csv_blackboa
         row[score_column]       = final_score
         
         writer.writerow(row)
+            
