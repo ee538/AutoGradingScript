@@ -124,7 +124,7 @@ def generate_coding_grader(coding_grader_name):
     # input how many points should be allocated for each question
     print('================================================================================')
     print('All tests are valid!')
-    print('Please enter the full score for each question:')
+    print('Please enter the full score for each question (coding part):')
     full_score = {}
     for q_num in q_nums:
         score = input('Q' + q_num + ' (' + str(test_cases[q_num]) + ' test cases): ')
