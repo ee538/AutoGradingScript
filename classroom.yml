@@ -14,7 +14,7 @@ jobs:
         name: Load data
         run: |
              file_datetime=$(date --date="$(grep -P '^.+\d\d\d\d$' ScoresCodingTotal.txt | tail -1 )" +"%Y%m%d%H%M%S")
-             current_timestamp=$(date -d -1hours +"%Y%m%d%H%M%S")
+             current_timestamp=$(date -d -90min +"%Y%m%d%H%M%S")
              echo 'last grading: ' $file_datetime
              echo 'current time: ' $current_timestamp
              if [[ "$file_datetime" =~ ^[0-9]{14}$ && ! "$file_datetime" =~ ^[0-9]{8}000000$ ]]; then
