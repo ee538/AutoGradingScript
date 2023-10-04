@@ -43,7 +43,7 @@ def bazel_test(task):
 
     return [test_output, error_msg]
 
-def run_test(path_q_num, student_test=False):
+def run_test(path_q_num, student_test=False, return_all=False):
     
     tasks = [path_q_num + ':grader_test']
 
@@ -57,17 +57,22 @@ def run_test(path_q_num, student_test=False):
         test_output, error_msg = bazel_test(task)
         print(test_output + error_msg)
         if task != tasks[-1] and error_msg != '':
-            return {
+            res = {
                 'passed':   0,
                 'failed':   0,
                 'error':    'Student test ' + error_msg,
             }
-    
-    return {
+            if return_all:
+                res.update({"test_output": test_output})
+            return res
+    res = {
         'passed':           test_output.count('[       OK ]'),
         'failed':           test_output.count('FAIL'),
         'error':            error_msg,
     }
+    if return_all:
+        res.update({"test_output": test_output})
+    return res
 
 # def output_json(score_obj):
 #     # reference: https://gradescope-autograders.readthedocs.io/en/latest/specs/#output-format
