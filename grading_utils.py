@@ -17,13 +17,13 @@ def bazel_test(task):
         'test',
         task,
         '--test_output=all',
-        '--test_timeout=270',
+        '--test_timeout=90',
         '--config=asan'
     ]
     test_output = ''
     error_msg = ''
     try:
-        test_output = subprocess.check_output(test_cmd, stderr=subprocess.STDOUT, timeout=300).decode()
+        test_output = subprocess.check_output(test_cmd, stderr=subprocess.STDOUT, timeout=120).decode()
     except subprocess.TimeoutExpired as e:
         test_output = e.output.decode()
         error_msg = 'ERROR: Timeout expired!'
