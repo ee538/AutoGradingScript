@@ -163,7 +163,9 @@ def generate_assignment(hw_name):
     exec_cmd('mkdir -p ' + hw_name + '/.github/workflows')
     for file in file_list:
         exec_cmd('cp -r ' + file + ' ' + hw_name)
-    exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
+    for q_num in q_nums:
+        exec_cmd('cp sol/' + q_num + '/grader_test.cc ' + hw_name + '/files/' + q_num + '/')
+    # exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
         
     output_json({
         'q_nums': q_nums,
