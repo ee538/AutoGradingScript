@@ -4,7 +4,7 @@ AutoGradingScript for USC EE-538 version 0.2 on 1/19/2023.
 ### 1. How to Use
 Take **Fall22_HW5** as the example:
 
-> You can also watch this [5 minutes' video](https://viterbi-web.usc.edu/~yudewei/538/How%20to%20deploy%20assignments%20(part%201).mp4) to know how to use the tool.
+> You can also watch this [5 minutes' video](demo/How%20to%20deploy%20assignments%20(part%201).mp4) to know how to use the tool.
 
 - 1.1. Start Ubuntu system and go to workspace.
 
@@ -116,7 +116,7 @@ Take **Fall22_HW5** as the example:
 
 - 1.10. Type yes to clean temporary files. Finally remove the `AutoGradingScipt` folder from the repo.
 
-- 1.11. Manually set the Assignment repo as a template and deploy the GitHub classroom. Post it on Piazza. You may watch another [5 minutes' video](https://viterbi-web.usc.edu/~yudewei/538/How%20to%20deploy%20assignments%20(part%202).mp4) to know how to do that.
+- 1.11. Manually set the Assignment repo as a template and deploy the GitHub classroom. Post it on Piazza. You may watch another [5 minutes' video](demo/How%20to%20deploy%20assignments%20(part%202).mp4) to know how to do that.
 
 ### 2. Repos Needed
 
