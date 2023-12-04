@@ -2,7 +2,7 @@ import requests, csv, json, base64, re, datetime, os
 
 all_files = os.listdir()
 
-default_csv_path = next((s for s in all_files if '-grades-' in s and 'csv_out.csv' not in s), '')
+default_csv_path = next((s for s in all_files if '-grades-' in s and 'csv_out.csv' in s and '_out' not in s), '')
 default_csv_student_name_path = next((s for s in all_files if 'name.csv' in s), '')
 default_csv_blackboard_path = next((s for s in all_files if '_column_' in s and '.csv' in s), '')
 
