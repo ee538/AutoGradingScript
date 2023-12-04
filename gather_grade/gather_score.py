@@ -2,15 +2,14 @@ import requests, csv, json, base64, re, datetime, os
 
 all_files = os.listdir()
 
-default_csv_path = next((s for s in all_files if '-grades-' in s and 'csv_out.csv' in s and '_out' not in s), '')
+default_csv_path = next((s for s in all_files if '-grades-' in s and 'csv_out.csv' in s), '')
 default_csv_student_name_path = next((s for s in all_files if 'name.csv' in s), '')
 default_csv_blackboard_path = next((s for s in all_files if '_column_' in s and '.csv' in s), '')
 
 
 csv_student_name_path = input('student name csv file (default: ' + default_csv_student_name_path + '): ') or default_csv_student_name_path
 csv_blackboard_path = input('Blackboard csv file (default: ' + default_csv_blackboard_path + '): ') or default_csv_blackboard_path
-csv_path = input('GitHub Classroom csv file name (default: ' + default_csv_path + '): ') or default_csv_path
-csv_classroom_path = csv_path + '_out.csv'
+csv_classroom_path = input('GitHub Classroom csv file name (default: ' + default_csv_path + '): ') or default_csv_path
 
 with open(csv_blackboard_path, newline='', encoding='utf-8-sig') as csv_blackboard, \
     open(csv_classroom_path, newline='') as csv_classroom, \
@@ -35,7 +34,7 @@ with open(csv_blackboard_path, newline='', encoding='utf-8-sig') as csv_blackboa
         last_name = row['Last Name']
         git_names = [name_row['Github Username'] for name_row in name_map if name_row['First Name'] == first_name and name_row['Last Name'] == last_name]
         if len(git_names) != 1:
-            print("error in processing " + first_name + ' ' + last_name)
+            print("error in processing (GitName):" + first_name + ' (Student Name):' + last_name)
             print("Git name does not match: " + git_names)
             print('-------- please check it manually --------')
             writer.writerow(row)
@@ -43,7 +42,7 @@ with open(csv_blackboard_path, newline='', encoding='utf-8-sig') as csv_blackboa
         git_name = git_names[0]
         final_scores = [score_row['final_score'] for score_row in github_score if score_row['github_username'] == git_name]
         if len(final_scores) != 1:
-            print("error in processing " + git_name + ' ' + first_name + ' ' + last_name)
+            print("error in processing (GitName):" + git_name + ' (Student Name):' + first_name + ' ' + last_name)
             print("Final score does not match: " + str(final_scores))
             print('-------- please check it manually --------')
             writer.writerow(row)
