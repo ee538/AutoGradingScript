@@ -21,7 +21,12 @@ Take **Fall22_HW5** as the example:
    cd EE538_Fall22_HW5
    ```
 
-- 1.3. **The first step is always checking the ambiguity and the error manually in the code or instructions. Correct them and then proceed.** 
+- 1.3. **The first step is always checking the ambiguity and the error manually in the code or instructions. Correct them and then proceed.**
+Check for the due date to be updated. Also, run this command to see if all tests pass:
+
+```bash
+bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep grader)
+```
 
 - 1.4. Inside the repo folder, we need to make sure there is no error and **all the tests can pass with the solution provided** through a script.
 
