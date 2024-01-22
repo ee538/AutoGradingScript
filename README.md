@@ -70,7 +70,8 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
 
    This means all the grader tests have passed with the solution provided.
 
-- 1.7. Assign some score for each question. You will see a summary like this:
+- 1.7. Assign some score for each question. Use the table on the assignment's README file to do this.
+You will see a summary like this:
 
    ```json
    Please enter the full score for each question:
