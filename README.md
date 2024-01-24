@@ -48,7 +48,7 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
 
 - 1.6. The script will run all of the grader tests for several minutes. Please be patient and wait. If you finally see a summary like this:
 
-   ```json
+   ```shell
    {
        "1": {
            "passed": 2,
@@ -75,7 +75,7 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
 - 1.7. Assign some score for each question. Use the table on the assignment's README file to do this.
 You will see a summary like this:
 
-   ```json
+   ```shell
    Please enter the full score for each question:
    Q1 (2 test cases): 20
    Q2 (7 test cases): 45
