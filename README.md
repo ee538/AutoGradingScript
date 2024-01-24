@@ -1,6 +1,8 @@
 # AutoGradingScript
 AutoGradingScript for USC EE-538 version 0.2 on 1/19/2023.
 
+Please see the FAQ below part 2. The FAQ for students is [here](./FAQ/FAQ.md).
+
 ### 1. How to Use
 Take **Fall22_HW5** as the example:
 
@@ -120,19 +122,55 @@ You will see a summary like this:
 
    Paste the GitHub token to get authentication. Press enter and go the GitHub to check if the two repos have been deployed properly.
 
-- 1.10. Type yes to clean temporary files. Finally remove the `AutoGradingScipt` folder from the repo.
+- 1.10. Type `Yes` to clean temporary files. Finally remove the `AutoGradingScipt` folder from the repo. Now, on GitHub webpage you will see there is one **public** repo named `<homework name>_CodingGrader` that contains the grader test cases and one **private** repo named `<homework name>`. You can try the following steps to release the homework.
 
-- 1.11. Manually set the Assignment repo as a template and deploy the GitHub classroom. Post it on Piazza. You may watch another [5 minutes' video](demo/How%20to%20deploy%20assignments%20(part%202).mp4) to know how to do that.
+### 2. Continue to Release the Homework
 
-### 2. Repos Needed
+> Here you need to manually set the Assignment repo as a template and deploy the GitHub classroom. Post it on Piazza. You may watch another [5 minutes' video](demo/How%20to%20deploy%20assignments%20(part%202).mp4) to know how to do that.
+
+- 2.1. Go to the `settings` tab of the  `<homework name>` repo on GitHub webpage and check the `Template repository` box, as shown below.
+
+![setastemplate](./demo/setastemplate.jpg)
+
+- 2.2 Go to the EE538 GitHub Classroom for this semester. If there is not one for this semester, you can create a new one [here](https://classroom.github.com/classrooms/).
+
+![classroomlist](./demo/classroomlist.jpg)
+
+- 2.3 Hit the `New assignment` button to create an assignment. Set the **title**, **deadline** and check the **cutoff date** box if late submissions are not accepted. Choose the **private template `ee538/<homework name>` repo**. We only create `individual` and `private` assignments so that students will not see others' submissions.
+
+![classroomthissemester](./demo/classroomthissemester.jpg)
+
+![assignmentbasics](./demo/assignmentbasics.jpg)
+
+![assignmentenv](./demo/assignmentenv.jpg)
+
+![assignmentgrading](./demo/assignmentgrading.jpg)
+
+- 2.4 After the assignment is created, please try it before we post the link on Piazza to release it. We can accept the assignment first and try some submissions to see if everything is working well.
+
+- 2.5 FAQ for course staff:
+
+    - Q1: How to adjust the points for each question after the homework is released to students already?
+
+    - A1: We can go to the `<homework name>_CodingGrader` and change the `questions.json` file to adjust the points.
+
+    - Q2: How to enable/disable the auto-grading with GitHub Workflows?
+
+    - A2: We can go to the `<homework name>` copy the `classroom.yml` file there to enable it, or we can remove that file to disable it.
+
+    - Q3: How to deploy a collaborative assignment like the final project?
+
+    - A3: We still deploy it as what we do for a normal assignment. If students need to work in team, they can create a new repo **under their own GitHub account**, copy the working files to their own repos and then they can invite other members anyway. But finally, they have to copy all their files back to the repo generated from GitHub Classroom under the ee538 GitHub Organization **for submission purpose**. We have never tried a collaborative assignment functionality before, and not sure if the auto grading flow can work well with it.
+
+### 3. Repos Needed
 
 To use this grading script, 3 repos are needed.
 
-#### 2.1. Grading Script
+#### 3.1. Grading Script
 
 This repo (AutoGradingScript) is the **public** grading script repo, where [`coding_grades_total.py`](./coding_grades_total.py) is required.
 
-#### 2.2. Grader Test
+#### 3.2. Grader Test
 
 A **public** grader test repo is needed with the directory like this:
 
@@ -256,7 +294,7 @@ memory misuse:
 
 After creating the `questions.json` and solving the errors in the grader_test.cc, the preparation for this repo is done.
 
-#### 2.3. Student Repository
+#### 3.3. Student Repository
 
 ```shell
 .
@@ -302,7 +340,7 @@ Finally, copy [`classroom.yml`](./classroom.yml) from this repo to the student r
 
 
 
-### 3. `coding_grades_total.py`
+### 4. `coding_grades_total.py`
 
 The script should be similar to this:
 
@@ -350,7 +388,7 @@ For each question, **calculate the number of the passed test cases** and compare
 
 Finally `total_coding_score` is calculated.
 
-### 4. `classroom.yml`
+### 5. `classroom.yml`
 
 The `classroom.yml` file should be similar to this:
 
@@ -377,6 +415,15 @@ testing:
 ```
 
 First, read question information from `config.json` created in step [1.3.](#13-student-repository) and generate parallel jobs to test each question. Set timeout for each question as 3 minutes and continue on error flag.
+
+```shell
+file_datetime=$(date --date="$(grep -P '^.+\d\d\d\d$' ScoresCodingTotal.txt | tail -1 )" +"%Y%m%d%H%M%S")
+             current_timestamp=$(date -d -90min +"%Y%m%d%H%M%S")
+             echo 'last grading: ' $file_datetime
+             echo 'current time: ' $current_timestamp
+```
+
+This part of code is to set hte minimum grading interval between two submissions. The `-90min` means a new grading will only be performed if this submission is 90 minutes after the previous submission. 
 
 ```shell
 cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
