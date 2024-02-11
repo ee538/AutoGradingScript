@@ -35,7 +35,7 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
    Download the script:
 
    ```bash
-   https://github.com/ee538/AutoGradingScript.git
+   git clone https://github.com/ee538/AutoGradingScript.git
    ```
 
    Run the script:
