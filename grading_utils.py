@@ -202,7 +202,7 @@ if __name__ == '__main__':
     print('================================================================================')
     key_in = ''
     key_in = input('Do you want to upload the two repo? [ (Y)es / (N)o ]: ')
-    if key_in == 'y' or key_in == 'Y' or key_in == 'yes':
+    if key_in == 'y' or key_in == 'Y' or key_in == 'yes' or key_in == 'Yes':
         git_token = input('github token: ')
         git_upload(hw_name, git_token, 'true')
         git_upload(coding_grader_name, git_token, 'false')
@@ -210,7 +210,7 @@ if __name__ == '__main__':
     print('================================================================================')
     key_in = ''
     key_in = input('Do you want to clean the two repo? [ (Y)es / (N)o ]: ')
-    if key_in == 'y' or key_in == 'Y' or key_in == 'yes':
+    if key_in == 'y' or key_in == 'Y' or key_in == 'yes' or key_in == 'Yes':
         exec_cmd('rm -rf ' + hw_name)
         exec_cmd('rm -rf ' + coding_grader_name)
 
