@@ -62,7 +62,7 @@ jobs:
       - name: Test Q${{ matrix.q_num }}
         if: always()
         run: |
-             cp files/${{ matrix.q_num }}/* coding_grader/${{ matrix.q_num }}/ || echo "No q.h found, skipping..."
+             cp files/${{ matrix.q_num }}/q.cc coding_grader/${{ matrix.q_num }}/ || echo "No q.h found, skipping..."
              
              echo "--------- Student Test ---------"
              bazel run --config=asan --enable_workspace --ui_event_filters=-info,-stdout,-stderr //files/${{ matrix.q_num }}:student_test
@@ -92,6 +92,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload result for Q${{ matrix.q_num }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Q${{ matrix.q_num }}res_.txt

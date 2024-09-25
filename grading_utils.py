@@ -16,9 +16,9 @@ def bazel_test(task):
         'bazel',
         'test',
         task,
+        '--enable_workspace',
         '--test_output=all',
         '--test_timeout=90',
-        '--config=asan'
     ]
     test_output = ''
     error_msg = ''
@@ -54,8 +54,48 @@ def run_test(path_q_num, student_test=False, return_all=False):
     print('================================================================================\n')
     print(path_q_num + ' testing:')
     for task in tasks:
+        hw_path_q_num = path_q_num.replace('sol', 'files')
+
+        bazel_entry = [
+            'cc_binary(\n',
+            '    name="libgrader_test.so",\n',
+            '    srcs=["grader_test.cc", "q.h"],\n',
+            '    includes=["/usr/include/gtest/"],\n',
+            '    linkshared=True,\n',
+            ')\n'
+        ]
+
+        with open(os.path.join(path_q_num, "BUILD"), 'r') as f:
+            text = f.read()
+            text = text.replace("grader_test.cc", "libgrader_test.so")
+        with open(os.path.join(path_q_num, "BUILD"), 'w') as f:
+            f.write(text)
+            f.writelines(bazel_entry)
+
         test_output, error_msg = bazel_test(task)
         print(test_output + error_msg)
+        exec_cmd('cp bazel-bin/' + path_q_num + '/libgrader_test.so ' + path_q_num)
+
+        with open(os.path.join(path_q_num, "BUILD"), 'r') as f:
+            lines = f.readlines()
+        with open(os.path.join(path_q_num, "BUILD"), 'w') as f:
+            f.writelines(lines[:-6])
+
+        i_start = -1
+        i_end = -1
+        with open(os.path.join(hw_path_q_num, "BUILD"), 'r') as f:
+            lines = f.readlines()
+            for i in range(len(lines)):
+                if 'name = "grader_test"' in lines[i]:
+                    i_start = i - 2
+                if i_start != -1 and lines[i].startswith(')'):
+                    i_end = i + 1
+                    break
+
+        with open(os.path.join(hw_path_q_num, "BUILD"), 'w') as f:
+            f.writelines(lines[:i_start])
+            f.writelines(lines[i_end:])
+
         if task != tasks[-1] and error_msg != '':
             res = {
                 'passed':   0,
@@ -121,7 +161,7 @@ def generate_coding_grader(coding_grader_name):
     exec_cmd('rm -rf ' + coding_grader_name)
     exec_cmd('mkdir ' + coding_grader_name)
     [exec_cmd('cp -r sol/' + str(q_num) + " " + coding_grader_name + "/" + str(q_num)) for q_num in q_nums]
-    exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name *.csh`')
+    exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name grader_test.cc -o -name *.csh`')
     
     # count the number of test cases for each question using the number of passed tests
     test_cases = { q_num: test_results[q_num]['passed'] for q_num in q_nums }
@@ -147,7 +187,7 @@ def generate_assignment(hw_name):
     coding_grader_name = hw_name + '_CodingGrader'
     all_files = sorted(os.listdir('files'))
     ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
-    q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
+    q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/libgrader_test.so')), ungrading_q_nums))
         
     file_list = [
         '.vscode',
@@ -163,9 +203,9 @@ def generate_assignment(hw_name):
     exec_cmd('mkdir -p ' + hw_name + '/.github/workflows')
     for file in file_list:
         exec_cmd('cp -r ' + file + ' ' + hw_name)
-    for q_num in q_nums:
-        exec_cmd('cp sol/' + q_num + '/grader_test.cc ' + hw_name + '/files/' + q_num + '/')
-    # exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
+    # for q_num in q_nums:
+    #     exec_cmd('cp sol/' + q_num + '/libgrader_test.so ' + hw_name + '/files/' + q_num + '/')
+    exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
         
     output_json({
         'q_nums': q_nums,
@@ -213,6 +253,8 @@ if __name__ == '__main__':
     if key_in == 'y' or key_in == 'Y' or key_in == 'yes' or key_in == 'Yes':
         exec_cmd('rm -rf ' + hw_name)
         exec_cmd('rm -rf ' + coding_grader_name)
+        exec_cmd('rm -f sol/*/libgrader_test.so')
+        exec_cmd('git restore .')
 
 # if __name__ == '__main__':
     
