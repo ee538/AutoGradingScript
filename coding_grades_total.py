@@ -6,7 +6,6 @@ import os
 def get_ok_num_perq(tresfile):
     # Check if the file exists before opening
     if not os.path.exists(tresfile):
-        print(f"File '{tresfile}' not found. Skipping...")
         return 0  # Return 0 if file is missing
 
     with open(tresfile, "r") as file:
