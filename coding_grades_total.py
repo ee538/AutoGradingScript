@@ -1,13 +1,19 @@
 from __future__ import print_function
 import json
+import os
 
 # count the number of lines in the tresfile
 def get_ok_num_perq(tresfile):
-    file = open(tresfile, "r")
-    f = file.read()
-    lists = f.split("\n")
-    file.close()
-    return sum(x != '' for x in lists)
+    # Check if the file exists before opening
+    if not os.path.exists(tresfile):
+        print(f"File '{tresfile}' not found. Skipping...")
+        return 0  # Return 0 if file is missing
+
+    with open(tresfile, "r") as file:
+        lists = file.read().split("\n")
+
+    return sum(bool(x.strip()) for x in lists)  # Strip removes extra spaces
+
 
 if __name__ == '__main__':
 
