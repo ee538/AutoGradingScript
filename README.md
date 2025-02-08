@@ -3,6 +3,12 @@ AutoGradingScript for USC EE-538 version 0.2 on 1/19/2023.
 
 Please see the FAQ below part 2. The FAQ for students is [here](./FAQ/FAQ.md).
 
+### 0. Fall 2024 Update
+In order to generate the libgrader_test.so file and hide actual grader test cases from students, you need to install the `libgmock-dev` package by:
+```
+sudo apt-get install libgmock-dev
+```
+
 ### 1. How to Use
 Take **Fall22_HW5** as the example:
 

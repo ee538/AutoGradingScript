@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, json, subprocess
+import os, json, subprocess, argparse
 # from unittest import TestResult
 
 def exec_cmd(cmd):
@@ -16,9 +16,9 @@ def bazel_test(task):
         'bazel',
         'test',
         task,
+        '--enable_workspace',
         '--test_output=all',
         '--test_timeout=90',
-        '--config=asan'
     ]
     test_output = ''
     error_msg = ''
@@ -43,7 +43,7 @@ def bazel_test(task):
 
     return [test_output, error_msg]
 
-def run_test(path_q_num, student_test=False, return_all=False):
+def run_test(path_q_num, student_test=False, return_all=False, hide_grader=False):
     
     tasks = [path_q_num + ':grader_test']
 
@@ -54,8 +54,51 @@ def run_test(path_q_num, student_test=False, return_all=False):
     print('================================================================================\n')
     print(path_q_num + ' testing:')
     for task in tasks:
+        if hide_grader:
+            hw_path_q_num = path_q_num.replace('sol', 'files')
+
+            bazel_entry = [
+                'cc_binary(\n',
+                '    name="libgrader_test.so",\n',
+                '    srcs=["grader_test.cc", "q.h"],\n',
+                '    includes=["/usr/include/gtest/"],\n',
+                '    linkshared=True,\n',
+                ')\n'
+            ]
+
+            with open(os.path.join(path_q_num, "BUILD"), 'r') as f:
+                text = f.read()
+                text = text.replace("grader_test.cc", "libgrader_test.so")
+            with open(os.path.join(path_q_num, "BUILD"), 'w') as f:
+                f.write(text)
+                f.writelines(bazel_entry)
+
         test_output, error_msg = bazel_test(task)
         print(test_output + error_msg)
+
+        if hide_grader:
+            exec_cmd('cp bazel-bin/' + path_q_num + '/libgrader_test.so ' + path_q_num)
+
+            with open(os.path.join(path_q_num, "BUILD"), 'r') as f:
+                lines = f.readlines()
+            with open(os.path.join(path_q_num, "BUILD"), 'w') as f:
+                f.writelines(lines[:-6])
+
+            i_start = -1
+            i_end = -1
+            with open(os.path.join(hw_path_q_num, "BUILD"), 'r') as f:
+                lines = f.readlines()
+                for i in range(len(lines)):
+                    if 'name = "grader_test"' in lines[i]:
+                        i_start = i - 2
+                    if i_start != -1 and lines[i].startswith(')'):
+                        i_end = i + 1
+                        break
+
+            with open(os.path.join(hw_path_q_num, "BUILD"), 'w') as f:
+                f.writelines(lines[:i_start])
+                f.writelines(lines[i_end:])
+
         if task != tasks[-1] and error_msg != '':
             res = {
                 'passed':   0,
@@ -101,13 +144,13 @@ def output_json(dict_obj: dict, file_path: str, disp: bool=False) -> None:
         print('================================================================================')
         print(file_path + '\n' + json_str)
 
-def generate_coding_grader(coding_grader_name):
+def generate_coding_grader(coding_grader_name, hide_grader=False):
     all_files = sorted(os.listdir('sol'))
     ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
     q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
     
     # execute all the grader tests for all the questions and get the testing results
-    test_results = { q_num: run_test('sol/' + q_num) for q_num in q_nums }
+    test_results = { q_num: run_test('sol/' + q_num, hide_grader=hide_grader) for q_num in q_nums }
     output_json(test_results, '', True)
     
     # if some of the test are not passed, then exit
@@ -121,7 +164,10 @@ def generate_coding_grader(coding_grader_name):
     exec_cmd('rm -rf ' + coding_grader_name)
     exec_cmd('mkdir ' + coding_grader_name)
     [exec_cmd('cp -r sol/' + str(q_num) + " " + coding_grader_name + "/" + str(q_num)) for q_num in q_nums]
-    exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name *.csh`')
+    if hide_grader:
+        exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name grader_test.cc -o -name *.csh`')
+    else:
+        exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name *.csh`')
     
     # count the number of test cases for each question using the number of passed tests
     test_cases = { q_num: test_results[q_num]['passed'] for q_num in q_nums }
@@ -143,12 +189,14 @@ def generate_coding_grader(coding_grader_name):
         'full_score': full_score
     }, coding_grader_name + '/questions.json', disp=True)
     
-def generate_assignment(hw_name):
+def generate_assignment(hw_name, hide_grader=False):
     coding_grader_name = hw_name + '_CodingGrader'
     all_files = sorted(os.listdir('files'))
     ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
-    q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
-        
+    if hide_grader:
+        q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/libgrader_test.so')), ungrading_q_nums))
+    else:
+        q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
     file_list = [
         '.vscode',
         'files',
@@ -163,9 +211,10 @@ def generate_assignment(hw_name):
     exec_cmd('mkdir -p ' + hw_name + '/.github/workflows')
     for file in file_list:
         exec_cmd('cp -r ' + file + ' ' + hw_name)
-    for q_num in q_nums:
-        exec_cmd('cp sol/' + q_num + '/grader_test.cc ' + hw_name + '/files/' + q_num + '/')
-    # exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
+    if not hide_grader:
+        for q_num in q_nums:
+            exec_cmd('cp sol/' + q_num + '/grader_test.cc ' + hw_name + '/files/' + q_num + '/')
+    exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
         
     output_json({
         'q_nums': q_nums,
@@ -190,14 +239,23 @@ def git_upload(dir: str, token: str='', private: str='true', repo: str='') -> No
     os.chdir(cwd)
     
 if __name__ == '__main__':
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '--hide-grader',
+        action='store_true',
+        help='Hide grader test cases')
+
+    args = argparser.parse_args()
+    hide_grader = args.hide_grader
+
     default_name = '_'.join(os.path.split(os.getcwd())[-1].split('_')[1:])
     hw_name = input('Please enter the name of this assignment (default: ' + default_name + '): ')
     if hw_name == '':
         hw_name = default_name
     coding_grader_name = hw_name + '_CodingGrader'
         
-    generate_coding_grader(coding_grader_name)
-    generate_assignment(hw_name)
+    generate_coding_grader(coding_grader_name, hide_grader)
+    generate_assignment(hw_name, hide_grader)
     
     print('================================================================================')
     key_in = ''
@@ -213,6 +271,8 @@ if __name__ == '__main__':
     if key_in == 'y' or key_in == 'Y' or key_in == 'yes' or key_in == 'Yes':
         exec_cmd('rm -rf ' + hw_name)
         exec_cmd('rm -rf ' + coding_grader_name)
+        exec_cmd('rm -f sol/*/libgrader_test.so')
+        exec_cmd('git restore .')
 
 # if __name__ == '__main__':
     
