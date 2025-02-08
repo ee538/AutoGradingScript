@@ -50,6 +50,12 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
    python3 AutoGradingScript/grading_utils.py
    ```
 
+   If need to hide the grader test cases from students, run the script with the following argument:
+
+   ```bash
+   python3 AutoGradingScript/grading_utils.py --hide-grader
+   ```
+
 - 1.5. Type the name `Fall22_HW5` for this assignment or type nothing if the default one is correct. Then press the enter key.
 
 - 1.6. The script will run all of the grader tests for several minutes. Please be patient and wait. If you finally see a summary like this:
