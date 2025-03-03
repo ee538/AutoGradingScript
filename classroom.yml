@@ -13,13 +13,13 @@ jobs:
       - id: load
         name: Load data
         run: |
-             file_datetime=$(date --date="$(grep -P '^.+\d\d\d\d$' ScoresCodingTotal.txt | tail -1 || echo "00000000000000")" +"%Y%m%d-%H%M%S-%3N")
-             current_timestamp=$(date -d "-30 min" +"%Y%m%d-%H%M%S-%3N")
+             file_datetime=$(date --date="$(grep -P '^.+\d\d\d\d$' ScoresCodingTotal.txt | tail -1 )" +"%Y%m%d%H%M%S")
+             current_timestamp=$(date -d -30min +"%Y%m%d%H%M%S")
 
              echo "Last grading: $file_datetime"
              echo "Current time: $current_timestamp"
 
-             if [[ "$file_datetime" =~ ^[0-9]{17}$ && ! "$file_datetime" =~ ^[0-9]{8}-000000-000$ ]]; then
+             if [[ "$file_datetime" =~ ^[0-9]{14}$ && ! "$file_datetime" =~ ^[0-9]{8}000000$ ]]; then
                  if [ "$current_timestamp" -le "$file_datetime" ]; then
                      echo "You are submitting too frequently."
                      echo "The auto grader does not work this way."
