@@ -52,6 +52,62 @@ jobs:
           repository: ${{ fromJSON(needs.setup.outputs.matrix).grader_repo }}
           path: 'coding_grader'
 
+      - name: Normalize Bazel compatibility
+        run: |
+             echo "8.4.2" > .bazelversion
+             python3 - <<'PY'
+             import re
+             from pathlib import Path
+
+             RULES_CC_LOAD = 'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")'
+             CC_RULES = ("cc_binary(", "cc_library(", "cc_test(")
+
+             def normalize_module(root):
+                 module_file = root / "MODULE.bazel"
+                 if not module_file.exists():
+                     return
+                 text = module_file.read_text()
+                 if re.search(r'^bazel_dep\(name = "rules_cc",.*$', text, flags=re.MULTILINE):
+                     text = re.sub(
+                         r'^bazel_dep\(name = "rules_cc",.*$',
+                         'bazel_dep(name = "rules_cc", version = "0.2.8")',
+                         text,
+                         flags=re.MULTILINE)
+                 else:
+                     text += '\nbazel_dep(name = "rules_cc", version = "0.2.8")\n'
+
+                 if re.search(r'^bazel_dep\(name = "googletest",.*$', text, flags=re.MULTILINE):
+                     text = re.sub(
+                         r'^bazel_dep\(name = "googletest",.*$',
+                         'bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")',
+                         text,
+                         flags=re.MULTILINE)
+                 else:
+                     text += 'bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")\n'
+                 module_file.write_text(text)
+
+             def normalize_build(build_file):
+                 text = build_file.read_text()
+                 if not any(rule in text for rule in CC_RULES):
+                     return
+                 if "@rules_cc//cc:defs.bzl" in text:
+                     text = re.sub(
+                         r'^load\("@rules_cc//cc:defs\.bzl".*\)\n\n?',
+                         RULES_CC_LOAD + "\n\n",
+                         text,
+                         count=1,
+                         flags=re.MULTILINE)
+                 else:
+                     text = RULES_CC_LOAD + "\n\n" + text
+                 build_file.write_text(text)
+
+             root = Path(".")
+             normalize_module(root)
+             for pattern in ("files/*/BUILD", "coding_grader/*/BUILD"):
+                 for build_file in root.glob(pattern):
+                     normalize_build(build_file)
+             PY
+
       - name: Generate high-precision timestamp
         run: echo "TIMESTAMP=$(date +%Y%m%d-%H%M%S-%3N)" >> $GITHUB_ENV
 

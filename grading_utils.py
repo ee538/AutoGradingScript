@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-import os, json, subprocess, argparse
+import os, json, subprocess, argparse, re
+from pathlib import Path
 # from unittest import TestResult
 
 def exec_cmd(cmd):
@@ -16,7 +17,6 @@ def bazel_test(task):
         'bazel',
         'test',
         task,
-        '--enable_workspace',
         '--test_output=all',
         '--test_timeout=90',
     ]
@@ -144,7 +144,56 @@ def output_json(dict_obj: dict, file_path: str, disp: bool=False) -> None:
         print('================================================================================')
         print(file_path + '\n' + json_str)
 
+RULES_CC_LOAD = 'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")'
+CC_RULES = ("cc_binary(", "cc_library(", "cc_test(")
+
+def normalize_bazel_compatibility(repo_root: str='.') -> None:
+    """Keep generated repos compatible with Bazel 9 and Bazelisk defaults."""
+    root = Path(repo_root)
+    module_file = root / 'MODULE.bazel'
+    if module_file.exists():
+        text = module_file.read_text()
+        if re.search(r'^bazel_dep\(name = "rules_cc",.*$', text, flags=re.MULTILINE):
+            text = re.sub(
+                r'^bazel_dep\(name = "rules_cc",.*$',
+                'bazel_dep(name = "rules_cc", version = "0.2.8")',
+                text,
+                flags=re.MULTILINE)
+        else:
+            text += '\nbazel_dep(name = "rules_cc", version = "0.2.8")\n'
+
+        if re.search(r'^bazel_dep\(name = "googletest",.*$', text, flags=re.MULTILINE):
+            text = re.sub(
+                r'^bazel_dep\(name = "googletest",.*$',
+                'bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")',
+                text,
+                flags=re.MULTILINE)
+        else:
+            text += 'bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")\n'
+        module_file.write_text(text)
+
+    bazelversion_file = root / '.bazelversion'
+    bazelversion_file.write_text('8.4.2\n')
+
+    for build_file in list(root.glob('files/*/BUILD')) + list(root.glob('sol/*/BUILD')) + list(root.glob('*/BUILD')):
+        text = build_file.read_text()
+        if not any(rule in text for rule in CC_RULES):
+            continue
+
+        if '@rules_cc//cc:defs.bzl' in text:
+            text = re.sub(
+                r'^load\("@rules_cc//cc:defs\.bzl".*\)\n\n?',
+                RULES_CC_LOAD + '\n\n',
+                text,
+                count=1,
+                flags=re.MULTILINE)
+        else:
+            text = RULES_CC_LOAD + '\n\n' + text
+        build_file.write_text(text)
+
 def generate_coding_grader(coding_grader_name, hide_grader=False):
+    normalize_bazel_compatibility()
+
     all_files = sorted(os.listdir('sol'))
     ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
     q_nums = list(filter(lambda file:(os.path.isfile('sol/' + file + '/grader_test.cc')), ungrading_q_nums))
@@ -168,6 +217,8 @@ def generate_coding_grader(coding_grader_name, hide_grader=False):
         exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name grader_test.cc -o -name *.csh`')
     else:
         exec_cmd('rm -rf `find ' + coding_grader_name + ' -name q.cc -o -name student_test.cc -o -name *.csh`')
+
+    normalize_bazel_compatibility(coding_grader_name)
     
     # count the number of test cases for each question using the number of passed tests
     test_cases = { q_num: test_results[q_num]['passed'] for q_num in q_nums }
@@ -190,6 +241,8 @@ def generate_coding_grader(coding_grader_name, hide_grader=False):
     }, coding_grader_name + '/questions.json', disp=True)
     
 def generate_assignment(hw_name, hide_grader=False):
+    normalize_bazel_compatibility()
+
     coding_grader_name = hw_name + '_CodingGrader'
     all_files = sorted(os.listdir('files'))
     ungrading_q_nums = list(filter(lambda file:(not os.path.isfile('sol/' + file)), all_files))
@@ -202,6 +255,8 @@ def generate_assignment(hw_name, hide_grader=False):
         'files',
         '.bazelrc',
         '.gitignore',
+        'MODULE.bazel',
+        'MODULE.bazel.lock',
         'README.md',
         'WORKSPACE'
     ]
@@ -215,6 +270,8 @@ def generate_assignment(hw_name, hide_grader=False):
         for q_num in q_nums:
             exec_cmd('cp sol/' + q_num + '/grader_test.cc ' + hw_name + '/files/' + q_num + '/')
     exec_cmd('cp AutoGradingScript/classroom.yml ' + hw_name + '/.github/workflows/')
+
+    normalize_bazel_compatibility(hw_name)
         
     output_json({
         'q_nums': q_nums,
