@@ -3,11 +3,13 @@ AutoGradingScript for USC EE-538 version 0.2 on 1/19/2023.
 
 Please see the FAQ below part 2. The FAQ for students is [here](./FAQ/FAQ.md).
 
-### 0. Fall 2024 Update
-In order to generate the libgrader_test.so file and hide actual grader test cases from students, you need to install the `libgmock-dev` package by:
-```
-sudo apt-get install libgmock-dev
-```
+### 0. Hidden Grader Platform Update
+
+Hidden grader binaries are platform-specific. The GitHub Classroom workflow runs on `ubuntu-22.04`, so the hidden `libgrader_test.so` files used by Classroom must be Linux x86-64 ELF shared objects.
+
+Apple Silicon Macs can also generate local hidden grader binaries, but those files are Mach-O arm64 and are only useful for local macOS testing. A Mach-O arm64 `libgrader_test.so` will not link on the Classroom Linux runner.
+
+The script no longer depends on the system `libgmock-dev` package for hidden grader generation. It uses the Bazel `googletest` dependency declared in `MODULE.bazel`.
 
 ### 1. How to Use
 Take **Fall22_HW5** as the example:
@@ -55,6 +57,31 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
    ```bash
    python3 AutoGradingScript/grading_utils.py --hide-grader
    ```
+
+   The script will ask which hidden grader binary platform to generate:
+
+   - `linux/amd64`: use this for GitHub Classroom.
+   - `macos/arm64`: use this for local Apple Silicon testing. If you choose to upload the generated grader repo, it will upload Mach-O arm64 `libgrader_test.so` files.
+
+   Non-interactive examples:
+
+   ```bash
+   python3 AutoGradingScript/grading_utils.py --hide-grader --grader-platform macos/arm64
+   ```
+
+   On Apple Silicon macOS, generate GitHub Classroom-compatible Linux binaries through Docker:
+
+   ```bash
+   docker run --rm --platform linux/amd64 -v "$PWD":/work -w /work gcr.io/bazel-public/bazel:8.4.2 bash -lc 'python3 AutoGradingScript/grading_utils.py --hide-grader --grader-platform linux/amd64'
+   ```
+
+   Before publishing the grader repo for GitHub Classroom, verify the binary type:
+
+   ```bash
+   file sol/*/libgrader_test.so
+   ```
+
+   GitHub Classroom-compatible output should include `ELF 64-bit` and `x86-64`. Apple Silicon local output should include `Mach-O` and `arm64`.
 
 - 1.5. Type the name `Fall22_HW5` for this assignment or type nothing if the default one is correct. Then press the enter key.
 
@@ -109,7 +136,8 @@ You will see a summary like this:
            "1": 20,
            "2": 45,
            "3": 45
-       }
+       },
+       "grader_platform": "linux/amd64"
    }
    ================================================================================
    Fall22_HW5/.github/workflows/config.json
@@ -119,14 +147,15 @@ You will see a summary like this:
            "2",
            "3"
        ],
-       "grader_repo": "ee538/Fall22_HW5_CodingGrader"
+       "grader_repo": "ee538/Fall22_HW5_CodingGrader",
+       "grader_platform": "linux/amd64"
    }
    ================================================================================
    ```
 
-- 1.8. If we don't want to grade some of the questions with the grading script, please remove them now in the two JSON files. 
+- 1.8. If we don't want to grade some of the questions with the grading script, please remove them now in the two JSON files.
 
-   `Fall22_HW5_CodingGrader/questions.json` 
+   `Fall22_HW5_CodingGrader/questions.json`
 
    `Fall22_HW5/.github/workflows/config.json`
 
@@ -134,7 +163,7 @@ You will see a summary like this:
 
    Paste the GitHub token to get authentication. Press enter and go the GitHub to check if the two repos have been deployed properly.
 
-- 1.10. Type `Yes` to clean temporary files. Finally remove the `AutoGradingScipt` folder from the repo. Now, on GitHub webpage you will see there is one **public** repo named `<homework name>_CodingGrader` that contains the grader test cases and one **private** repo named `<homework name>`. You can try the following steps to release the homework.
+- 1.10. If you choose the cleanup prompt, the script prints the generated paths that should be removed manually if you do not want to keep them locally. Finally remove the `AutoGradingScipt` folder from the assignment repo if you copied it there. Now, on GitHub webpage you will see one **public** repo named `<homework name>_CodingGrader` and one **private** repo named `<homework name>`. In source mode the grader repo contains `grader_test.cc`; in hidden mode it contains `libgrader_test.so`. You can try the following steps to release the homework.
 
 ### 2. Continue to Release the Homework
 
@@ -192,15 +221,19 @@ A **public** grader test repo is needed with the directory like this:
 .
 ├── 2
 │   ├── BUILD
-│   ├── grader_test.cc
+│   ├── grader_test.cc # source mode
+│   ├── libgrader_test.so # hidden mode
 │   └── q.h
 ├── 3
 │   ├── BUILD
 ...
-│   ├── grader_test.cc
+│   ├── grader_test.cc # source mode
+│   ├── libgrader_test.so # hidden mode
 │   └── q.h
 └── questions.json # other files are all from the professor's workspace except this file
 ```
+
+When `--hide-grader` is used, `grader_test.cc` is removed from the generated grader repo and `libgrader_test.so` is uploaded instead.
 
 The professor's workspace directory should be like:
 
@@ -248,13 +281,15 @@ where `questions.json` should be like:
 		"3": 15,
 		"4": 40,
 		"5": 30
-	}
+	},
+	"grader_platform": "linux/amd64"
 }
 ```
 
 - `q_nums`: The number the questions needed to be graded by the script.
 - `test_cases`: The number of the test cases in `grader_test.cc` for each question.
 - `full_score`: Full credits for each question.
+- `grader_platform`: The platform used to build hidden `libgrader_test.so` files, if hidden grading is enabled.
 
 
 
@@ -340,13 +375,15 @@ where `config.json` should be like:
 
 ```json
 {
-  "q_nums": ["2", "3", "4", "5"], 
-  "grader_repo": "ee538/Fall22_HW3_CodingGrader"
+  "q_nums": ["2", "3", "4", "5"],
+  "grader_repo": "ee538/Fall22_HW3_CodingGrader",
+  "grader_platform": "linux/amd64"
 }
 ```
 
 - `q_nums`: The number the questions needed to be graded by the script.
 - `grader_repo`: The location of the **Grader Test repo** prepared from the [previous step](#12-grader-test).
+- `grader_platform`: Informational metadata for the hidden grader binary platform.
 
 Finally, copy [`classroom.yml`](./classroom.yml) from this repo to the student repo.
 
@@ -369,7 +406,7 @@ with open('coding_grader/questions.json', encoding='utf-8') as q:
     test_cases = result.get('test_cases')
 ```
 
-First, read question information from `questions.json` create in step [1.2.](#12-grader-test). 
+First, read question information from `questions.json` create in step [1.2.](#12-grader-test).
 
 - `q_nums`: The number the questions needed to be graded by the script.
 
@@ -407,10 +444,10 @@ The `classroom.yml` file should be similar to this:
 ```yaml
 setup:
     outputs:
-      	matrix: ${{ steps.load.outputs.matrix }}
+        matrix: ${{ steps.load.outputs.matrix }}
     ...
     run: |
-    	data=`cat .github/workflows/config.json | tr '\n' ' ' | tr '\r' ' '`
+        data=`cat .github/workflows/config.json | tr '\n' ' ' | tr '\r' ' '`
         echo "::set-output name=matrix::$data"
 
     ...
@@ -420,8 +457,8 @@ testing:
     continue-on-error: true
     timeout-minutes: 3
     strategy:
-    	matrix:
-    		q_num: ${{ fromJSON(needs.setup.outputs.matrix).q_nums }}
+        matrix:
+            q_num: ${{ fromJSON(needs.setup.outputs.matrix).q_nums }}
     steps:
     ...
 ```
@@ -435,7 +472,7 @@ file_datetime=$(date --date="$(grep -P '^.+\d\d\d\d$' ScoresCodingTotal.txt | ta
              echo 'current time: ' $current_timestamp
 ```
 
-This part of code is to set hte minimum grading interval between two submissions. The `-90min` means a new grading will only be performed if this submission is 90 minutes after the previous submission. 
+This part of code is to set hte minimum grading interval between two submissions. The `-90min` means a new grading will only be performed if this submission is 90 minutes after the previous submission.
 
 ```shell
 cp files/${{matrix.q_num}}/q.cc coding_grader/${{matrix.q_num}}/
@@ -445,7 +482,7 @@ if [ $? -ne 0 ] ; then  exit 1; fi
 echo "--------- grader test ---------"
 bazel run --config=asan --ui_event_filters=-info,-stdout,-stderr //coding_grader/${{matrix.q_num}}:grader_test 2>&1 | tee Q${{matrix.q_num}}res.txt
 grep "OK" Q${{matrix.q_num}}res.txt > Q${{matrix.q_num}}res_.txt
-chmod 777 ~/.cache/* -R 
+chmod 777 ~/.cache/* -R
 ```
 
 If the student test is failed, then 0 point will be given for that question and stop running the following tests. Else run the grader test and count the number of passed test cases.

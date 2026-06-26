@@ -30,10 +30,10 @@ jobs:
                      exit 1
                  fi
              fi
-             
+
              # Read 'config.json' file
              data=$(cat .github/workflows/config.json | tr '\n' ' ' | tr '\r' ' ')
-             
+
              echo "matrix=$data" >> $GITHUB_OUTPUT
 
   testing:
@@ -61,29 +61,40 @@ jobs:
 
              RULES_CC_LOAD = 'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")'
              CC_RULES = ("cc_binary(", "cc_library(", "cc_test(")
+             CC_LIBRARY_BLOCK = re.compile(r'cc_library\(\n.*?^\)', flags=re.MULTILINE | re.DOTALL)
+
+             def ensure_cpplib_alwayslink(text):
+                 def add_alwayslink(match):
+                     block = match.group(0)
+                     if not re.search(r'name\s*=\s*"CPPLib"', block) or 'alwayslink' in block:
+                         return block
+
+                     lines = block.splitlines(keepends=True)
+                     insert_at = next((i for i, line in enumerate(lines) if 'visibility' in line), len(lines) - 1)
+                     lines.insert(insert_at, '    alwayslink = True,\n')
+                     return ''.join(lines)
+
+                 return CC_LIBRARY_BLOCK.sub(add_alwayslink, text)
+
+             def set_bazel_dep(text, dep_name, replacement):
+                 dep_pattern = re.compile(
+                     r'\n?bazel_dep\(\s*name\s*=\s*"' + re.escape(dep_name) + r'".*?\)\s*\n?',
+                     flags=re.DOTALL,
+                 )
+                 text = dep_pattern.sub('\n', text)
+                 return text.rstrip() + '\n' + replacement + '\n'
 
              def normalize_module(root):
                  module_file = root / "MODULE.bazel"
                  if not module_file.exists():
                      return
                  text = module_file.read_text()
-                 if re.search(r'^bazel_dep\(name = "rules_cc",.*$', text, flags=re.MULTILINE):
-                     text = re.sub(
-                         r'^bazel_dep\(name = "rules_cc",.*$',
-                         'bazel_dep(name = "rules_cc", version = "0.2.8")',
-                         text,
-                         flags=re.MULTILINE)
-                 else:
-                     text += '\nbazel_dep(name = "rules_cc", version = "0.2.8")\n'
-
-                 if re.search(r'^bazel_dep\(name = "googletest",.*$', text, flags=re.MULTILINE):
-                     text = re.sub(
-                         r'^bazel_dep\(name = "googletest",.*$',
-                         'bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")',
-                         text,
-                         flags=re.MULTILINE)
-                 else:
-                     text += 'bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")\n'
+                 text = set_bazel_dep(text, "rules_cc", 'bazel_dep(name = "rules_cc", version = "0.2.8")')
+                 text = set_bazel_dep(
+                     text,
+                     "googletest",
+                     'bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")',
+                 )
                  module_file.write_text(text)
 
              def normalize_build(build_file):
@@ -99,6 +110,7 @@ jobs:
                          flags=re.MULTILINE)
                  else:
                      text = RULES_CC_LOAD + "\n\n" + text
+                 text = ensure_cpplib_alwayslink(text)
                  build_file.write_text(text)
 
              root = Path(".")
@@ -119,14 +131,14 @@ jobs:
         if: always()
         run: |
              cp files/${{ matrix.q_num }}/q.cc coding_grader/${{ matrix.q_num }}/ || echo "No q.h found, skipping..."
-             
+
              echo "--------- Student Test ---------"
              bazel run --config=asan --enable_workspace --ui_event_filters=-info,-stdout,-stderr //files/${{ matrix.q_num }}:student_test
              if [ $? -ne 0 ] ; then exit 1; fi
 
              echo "--------- Grader Test ---------"
              bazel run --config=asan --enable_workspace --ui_event_filters=-info,-stdout,-stderr //coding_grader/${{ matrix.q_num }}:grader_test 2>&1 | tee Q${{ matrix.q_num }}res.txt
-             
+
              grep "OK" Q${{ matrix.q_num }}res.txt > Q${{ matrix.q_num }}res_.txt
 
       - name: Delete existing artifact (if any)
@@ -175,20 +187,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: downloaded-subscores
-          
+
       - name: Organize the total score (coding questions)
         if: always()
         run: |
              mkdir -p grades
 
              mv downloaded-subscores/*/* grades/
-             
+
              python grading_script/coding_grades_total.py 2>&1 | tee ScoresCodingTotal.txt
-             
+
              TZ='America/Los_Angeles' date >> ScoresCodingTotal.txt
 
              rm -rf grades coding_grader
-             
+
              git config --global user.email "ee538.autograder@gmail.com"
              git config --global user.name "AutograderEE538"
              git add ScoresCodingTotal.txt
