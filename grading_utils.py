@@ -44,16 +44,10 @@ def bazel_test(task):
     return [test_output, error_msg]
 
 GRADER_PLATFORM_LABELS = {
-    'macos-arm64': 'macos/arm64',
     'linux-amd64': 'linux/amd64',
 }
 
 GRADER_PLATFORM_ALIASES = {
-    'arm64': 'macos-arm64',
-    'darwin-arm64': 'macos-arm64',
-    'mac-arm64': 'macos-arm64',
-    'macos-arm64': 'macos-arm64',
-    'macos-aarch64': 'macos-arm64',
     'linux-amd64': 'linux-amd64',
     'linux-x86-64': 'linux-amd64',
     'linux-x64': 'linux-amd64',
@@ -62,11 +56,26 @@ GRADER_PLATFORM_ALIASES = {
     'x64': 'linux-amd64',
 }
 
+UNSUPPORTED_HIDDEN_GRADER_PLATFORMS = {
+    'arm64',
+    'darwin-arm64',
+    'mac-arm64',
+    'macos-arm64',
+    'macos-aarch64',
+}
+
 def normalize_grader_platform(value: str | None) -> str | None:
     if value is None or value == '':
         return None
 
     normalized = value.strip().lower().replace('/', '-').replace('_', '-')
+    if normalized in UNSUPPORTED_HIDDEN_GRADER_PLATFORMS:
+        raise SystemExit(
+            'macos/arm64 hidden grader binaries are not supported. '
+            'GitHub Classroom runs on ubuntu-22.04 linux/amd64, so hidden '
+            'libgrader_test.so files must be generated as Linux x86-64 ELF.'
+        )
+
     platform_key = GRADER_PLATFORM_ALIASES.get(normalized)
     if platform_key is None:
         allowed = ', '.join(sorted(GRADER_PLATFORM_LABELS.values()))
@@ -76,13 +85,12 @@ def normalize_grader_platform(value: str | None) -> str | None:
 def infer_current_grader_platform() -> str:
     system = platform.system().lower()
     machine = platform.machine().lower()
-    if system == 'darwin' and machine in ('arm64', 'aarch64'):
-        return 'macos-arm64'
     if system == 'linux' and machine in ('x86_64', 'amd64'):
         return 'linux-amd64'
     raise SystemExit(
-        f'Unsupported grader build host: {platform.system()} {platform.machine()}. '
-        'Use macos/arm64 or linux/amd64.'
+        f'Unsupported hidden grader build host: {platform.system()} {platform.machine()}.\n'
+        'Hidden graders for GitHub Classroom must be generated on linux/amd64.\n'
+        'On Apple Silicon macOS, run:\n' + docker_linux_amd64_hint()
     )
 
 def docker_linux_amd64_hint() -> str:
@@ -95,11 +103,6 @@ def docker_linux_amd64_hint() -> str:
 def validate_host_for_grader_platform(grader_platform: str) -> None:
     system = platform.system().lower()
     machine = platform.machine().lower()
-    if grader_platform == 'macos-arm64':
-        if system == 'darwin' and machine in ('arm64', 'aarch64'):
-            return
-        raise SystemExit('macos/arm64 grader binaries must be generated on Apple Silicon macOS.')
-
     if grader_platform == 'linux-amd64':
         if system == 'linux' and machine in ('x86_64', 'amd64'):
             return
@@ -118,9 +121,7 @@ def verify_grader_binary_platform(path: Path, grader_platform: str) -> None:
     description = file_description(path)
     print(description)
 
-    if grader_platform == 'macos-arm64':
-        ok = 'Mach-O' in description and 'arm64' in description
-    elif grader_platform == 'linux-amd64':
+    if grader_platform == 'linux-amd64':
         ok = 'ELF 64-bit' in description and ('x86-64' in description or 'x86_64' in description)
     else:
         ok = False
@@ -129,22 +130,10 @@ def verify_grader_binary_platform(path: Path, grader_platform: str) -> None:
         expected = GRADER_PLATFORM_LABELS[grader_platform]
         raise SystemExit(f'{path} is not a {expected} grader binary.')
 
-def prompt_grader_platform() -> str:
-    print('================================================================================')
-    print('Please choose the hidden grader binary platform:')
-    print('  1) linux/amd64  - for GitHub Classroom on ubuntu-22.04')
-    print('  2) macos/arm64  - for local Apple Silicon testing only')
-    choice = input('Platform [1=linux/amd64, 2=macos/arm64] (default: 1): ').strip()
-    if choice == '' or choice == '1':
-        return 'linux-amd64'
-    if choice == '2':
-        return 'macos-arm64'
-    return normalize_grader_platform(choice)
-
 def run_test(path_q_num, student_test=False, return_all=False, hide_grader=False, grader_platform=None):
     grader_platform = normalize_grader_platform(grader_platform)
     if hide_grader:
-        grader_platform = grader_platform or infer_current_grader_platform()
+        grader_platform = grader_platform or 'linux-amd64'
         validate_host_for_grader_platform(grader_platform)
 
     tasks = [path_q_num + ':grader_test']
@@ -338,7 +327,7 @@ def generate_coding_grader(coding_grader_name, hide_grader=False, grader_platfor
     normalize_bazel_compatibility()
     grader_platform = normalize_grader_platform(grader_platform)
     if hide_grader:
-        grader_platform = grader_platform or infer_current_grader_platform()
+        grader_platform = grader_platform or 'linux-amd64'
         validate_host_for_grader_platform(grader_platform)
         print('Hidden grader platform: ' + GRADER_PLATFORM_LABELS[grader_platform])
 
@@ -396,6 +385,8 @@ def generate_coding_grader(coding_grader_name, hide_grader=False, grader_platfor
 def generate_assignment(hw_name, hide_grader=False, grader_platform=None):
     normalize_bazel_compatibility()
     grader_platform = normalize_grader_platform(grader_platform)
+    if hide_grader:
+        grader_platform = grader_platform or 'linux-amd64'
 
     coding_grader_name = hw_name + '_CodingGrader'
     all_files = sorted(os.listdir('files'))
@@ -473,13 +464,13 @@ if __name__ == '__main__':
     argparser.add_argument(
         '--grader-platform',
         default='',
-        help='Hidden grader binary platform: linux/amd64 or macos/arm64')
+        help='Hidden grader binary platform. Only linux/amd64 is supported for GitHub Classroom.')
 
     args = argparser.parse_args()
     hide_grader = args.hide_grader
     grader_platform = normalize_grader_platform(args.grader_platform)
     if hide_grader:
-        grader_platform = grader_platform or prompt_grader_platform()
+        grader_platform = grader_platform or 'linux-amd64'
         validate_host_for_grader_platform(grader_platform)
 
     default_name = '_'.join(os.path.split(os.getcwd())[-1].split('_')[1:])

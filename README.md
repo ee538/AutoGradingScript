@@ -3,11 +3,11 @@ AutoGradingScript for USC EE-538 version 0.2 on 1/19/2023.
 
 Please see the FAQ below part 2. The FAQ for students is [here](./FAQ/FAQ.md).
 
-### 0. Hidden Grader Platform Update
+### 0. Hidden Grader Platform Requirement
 
-Hidden grader binaries are platform-specific. The GitHub Classroom workflow runs on `ubuntu-22.04`, so the hidden `libgrader_test.so` files used by Classroom must be Linux x86-64 ELF shared objects.
+Hidden grader binaries are compiled artifacts. They are tied to both an object file format and a CPU architecture. GitHub Classroom runs this workflow on `ubuntu-22.04`, which is Linux x86_64, so every hidden `libgrader_test.so` used by Classroom must be a Linux x86_64 ELF shared object.
 
-Apple Silicon Macs can also generate local hidden grader binaries, but those files are Mach-O arm64 and are only useful for local macOS testing. A Mach-O arm64 `libgrader_test.so` will not link on the Classroom Linux runner.
+Do not generate hidden grader binaries on macOS. Apple Silicon macOS produces Mach-O arm64 files, not Linux ELF x86_64 files. The Linux linker cannot read those binaries, and every hidden-grader question that depends on them will fail to link.
 
 The script no longer depends on the system `libgmock-dev` package for hidden grader generation. It uses the Bazel `googletest` dependency declared in `MODULE.bazel`.
 
@@ -58,18 +58,15 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
    python3 AutoGradingScript/grading_utils.py --hide-grader
    ```
 
-   The script will ask which hidden grader binary platform to generate:
-
-   - `linux/amd64`: use this for GitHub Classroom.
-   - `macos/arm64`: use this for local Apple Silicon testing. If you choose to upload the generated grader repo, it will upload Mach-O arm64 `libgrader_test.so` files.
+   This command must run in a Linux x86_64 environment. If it is run on macOS or any non-Linux-x86_64 host, the script exits instead of generating an unusable hidden grader binary.
 
    Non-interactive examples:
 
    ```bash
-   python3 AutoGradingScript/grading_utils.py --hide-grader --grader-platform macos/arm64
+   python3 AutoGradingScript/grading_utils.py --hide-grader --grader-platform linux/amd64
    ```
 
-   On Apple Silicon macOS, generate GitHub Classroom-compatible Linux binaries through Docker:
+   On macOS, generate GitHub Classroom-compatible Linux binaries through Docker:
 
    ```bash
    docker run --rm --platform linux/amd64 -v "$PWD":/work -w /work gcr.io/bazel-public/bazel:8.4.2 bash -lc 'python3 AutoGradingScript/grading_utils.py --hide-grader --grader-platform linux/amd64'
@@ -81,7 +78,7 @@ bazel test --config=asan --cxxopt='--std=c++17' $(bazel query //sol/... | grep g
    file sol/*/libgrader_test.so
    ```
 
-   GitHub Classroom-compatible output should include `ELF 64-bit` and `x86-64`. Apple Silicon local output should include `Mach-O` and `arm64`.
+   GitHub Classroom-compatible output must include `ELF 64-bit` and `x86-64`. If it says `Mach-O` or `arm64`, do not upload it to the grader repo.
 
 - 1.5. Type the name `Fall22_HW5` for this assignment or type nothing if the default one is correct. Then press the enter key.
 
