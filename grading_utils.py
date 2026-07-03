@@ -114,8 +114,37 @@ def validate_host_for_grader_platform(grader_platform: str) -> None:
 def file_description(path: Path) -> str:
     try:
         return subprocess.check_output(['file', str(path)], text=True).strip()
+    except FileNotFoundError:
+        return binary_header_description(path)
     except Exception as e:
         raise SystemExit(f'Unable to inspect {path}: {e}')
+
+def binary_header_description(path: Path) -> str:
+    data = path.read_bytes()[:32]
+    if data.startswith(b'\x7fELF'):
+        bits = '64-bit' if len(data) > 4 and data[4] == 2 else '32-bit'
+        endian = 'little' if len(data) > 5 and data[5] == 1 else 'big'
+        byteorder = 'little' if endian == 'little' else 'big'
+        machine = int.from_bytes(data[18:20], byteorder=byteorder) if len(data) >= 20 else None
+        arch = {
+            3: 'Intel 80386',
+            62: 'x86-64',
+            183: 'AArch64',
+        }.get(machine, f'e_machine={machine}')
+        return f'{path}: ELF {bits} {endian}-endian shared object, {arch} (detected from header)'
+
+    mach_o_magics = {
+        b'\xfe\xed\xfa\xce',
+        b'\xce\xfa\xed\xfe',
+        b'\xfe\xed\xfa\xcf',
+        b'\xcf\xfa\xed\xfe',
+        b'\xca\xfe\xba\xbe',
+        b'\xbe\xba\xfe\xca',
+    }
+    if data[:4] in mach_o_magics:
+        return f'{path}: Mach-O binary (detected from header)'
+
+    return f'{path}: unknown binary format (detected from header)'
 
 def verify_grader_binary_platform(path: Path, grader_platform: str) -> None:
     description = file_description(path)
