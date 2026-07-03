@@ -110,6 +110,7 @@ jobs:
                          flags=re.MULTILINE)
                  else:
                      text = RULES_CC_LOAD + "\n\n" + text
+                 text = text.replace('@googletest//', '@com_google_googletest//')
                  text = ensure_cpplib_alwayslink(text)
                  build_file.write_text(text)
 
