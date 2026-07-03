@@ -192,8 +192,11 @@ def run_test(path_q_num, student_test=False, return_all=False, hide_grader=False
 
             with open(os.path.join(path_q_num, "BUILD"), 'r') as f:
                 text = f.read()
-                source_build_text = text.replace("libgrader_test.so", "grader_test.cc")
+                source_build_text = remove_hidden_grader_binary_rule(
+                    text.replace("libgrader_test.so", "grader_test.cc")
+                )
                 text = source_build_text.replace("grader_test.cc", "libgrader_test.so")
+                text = remove_hidden_grader_binary_rule(text)
             with open(os.path.join(path_q_num, "BUILD"), 'w') as f:
                 f.write(text)
                 f.writelines(bazel_entry)
@@ -218,9 +221,9 @@ def run_test(path_q_num, student_test=False, return_all=False, hide_grader=False
                 raise SystemExit(f'ERROR: {built_grader} not found.')
 
             with open(os.path.join(path_q_num, "BUILD"), 'r') as f:
-                lines = f.readlines()
+                text = f.read()
             with open(os.path.join(path_q_num, "BUILD"), 'w') as f:
-                f.writelines(lines[:-len(bazel_entry)])
+                f.write(remove_hidden_grader_binary_rule(text))
 
         if task != tasks[-1] and error_msg != '':
             res = {
@@ -269,6 +272,7 @@ def output_json(dict_obj: dict, file_path: str, disp: bool=False) -> None:
 
 RULES_CC_LOAD = 'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")'
 CC_RULES = ("cc_binary(", "cc_library(", "cc_test(")
+CC_BINARY_BLOCK = re.compile(r'cc_binary\(\n.*?^\)', flags=re.MULTILINE | re.DOTALL)
 CC_LIBRARY_BLOCK = re.compile(r'cc_library\(\n.*?^\)', flags=re.MULTILINE | re.DOTALL)
 CC_TEST_BLOCK = re.compile(r'cc_test\(\n.*?^\)', flags=re.MULTILINE | re.DOTALL)
 
@@ -293,6 +297,19 @@ def remove_grader_test_rule(text: str) -> str:
         return block
 
     text = CC_TEST_BLOCK.sub(drop_grader_test, text)
+    return re.sub(r'\n{3,}', '\n\n', text).strip() + '\n'
+
+def remove_hidden_grader_binary_rule(text: str) -> str:
+    def drop_hidden_binary(match):
+        block = match.group(0)
+        if (
+            re.search(r'name\s*=\s*"(libgrader_test\.so|grader_test\.cc)"', block)
+            and 'linkshared' in block
+        ):
+            return ''
+        return block
+
+    text = CC_BINARY_BLOCK.sub(drop_hidden_binary, text)
     return re.sub(r'\n{3,}', '\n\n', text).strip() + '\n'
 
 def strip_staff_notes(text: str) -> str:
@@ -349,6 +366,7 @@ def normalize_bazel_compatibility(repo_root: str='.') -> None:
                 flags=re.MULTILINE)
         else:
             text = RULES_CC_LOAD + '\n\n' + text
+        text = text.replace('@googletest//', '@com_google_googletest//')
         text = ensure_cpplib_alwayslink(text)
         build_file.write_text(text)
 
